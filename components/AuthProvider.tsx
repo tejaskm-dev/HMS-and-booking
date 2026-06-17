@@ -36,11 +36,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const supabase = createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", currentUser.id)
       .single();
+    if (error) {
+      console.error("[AuthProvider] failed to load profile:", error.message, {
+        userId: currentUser.id,
+      });
+    }
     setProfile((data as Profile) ?? null);
   }, []);
 

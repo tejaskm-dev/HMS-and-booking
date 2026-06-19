@@ -106,7 +106,7 @@ export default function CreateHotelPage() {
           <Field label="Starter room name">
             <input className={inputClass} value={roomName} onChange={(e) => setRoomName(e.target.value)} />
           </Field>
-          <Field label="Price / night ($)">
+          <Field label="Price / night (₹)">
             <input type="number" min="0" step="1" className={inputClass} value={price} onChange={(e) => setPrice(e.target.value)} />
           </Field>
           <Field label="Rooms of this type">
@@ -120,9 +120,9 @@ export default function CreateHotelPage() {
       </form>
 
       <p className="mt-4 text-xs text-slate-400">
-        Tip: enter prices in USD ($) — they become the hotel&apos;s starting
-        price and are shown to each visitor converted to their local currency.
-        You can add more rooms later.
+        Tip: enter prices in rupees (₹) — they become the hotel&apos;s starting
+        price, and visitors outside India see them converted to their local
+        currency. You can add more rooms later.
       </p>
     </div>
   );

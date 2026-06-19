@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  razorpay,
-  getUsdInrRate,
-  PLATFORM_COMMISSION_RATE,
-} from "@/lib/razorpay";
+import { razorpay, PLATFORM_COMMISSION_RATE } from "@/lib/razorpay";
 
 // POST /api/payments/razorpay/order — create a Razorpay order for a booking.
 // If the hotel's manager has a Route linked account, the order also splits the
@@ -45,8 +41,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const rate = await getUsdInrRate();
-  const amountPaise = Math.round(Number(booking.total_price) * rate * 100);
+  // Prices are stored in INR, so the order amount is simply paise.
+  const amountPaise = Math.round(Number(booking.total_price) * 100);
 
   // Route split: pay the hotel owner their base (minus commission) if linked.
   let transfers:
@@ -56,8 +52,8 @@ export async function POST(request: Request) {
     p_hotel_id: booking.hotel_id,
   });
   if (payoutAccount) {
-    const baseInrPaise = Math.round(Number(booking.base_price) * rate * 100);
-    const managerShare = Math.round(baseInrPaise * (1 - PLATFORM_COMMISSION_RATE));
+    const basePaise = Math.round(Number(booking.base_price) * 100);
+    const managerShare = Math.round(basePaise * (1 - PLATFORM_COMMISSION_RATE));
     if (managerShare > 0 && managerShare <= amountPaise) {
       transfers = [
         {

@@ -5,8 +5,10 @@
 // fetch live exchange rates, and convert. If rates can't be loaded we fall
 // back to showing the base amount.
 
-export const BASE_CURRENCY = "USD";
-export const DEFAULT_LOCALE = "en-US";
+// Prices are stored in INR (the app is India-first and Razorpay charges INR).
+// Visitors elsewhere see converted prices via live FX.
+export const BASE_CURRENCY = "INR";
+export const DEFAULT_LOCALE = "en-IN";
 
 // Region (from the visitor's locale) → currency code.
 const REGION_CURRENCY: Record<string, string> = {

@@ -19,6 +19,11 @@ import {
   MapPinIcon,
 } from "@/components/icons";
 
+interface LocationSuggestion {
+  id: number;
+  name: string;
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -26,9 +31,75 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [fullName, setFullName] = useState("");
-  const [dob, setDob] = useState("");
   const [phone, setPhone] = useState("");
+  
+  // Date of Birth (Split Select State)
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
+  const [dob, setDob] = useState("");
+
+  // Location Autocomplete State
+  const [locationInput, setLocationInput] = useState("");
   const [location, setLocation] = useState("");
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Sync split DOB into YYYY-MM-DD
+  useEffect(() => {
+    if (dobDay && dobMonth && dobYear) {
+      setDob(`${dobYear}-${dobMonth}-${dobDay.padStart(2, "0")}`);
+    } else {
+      setDob("");
+    }
+  }, [dobDay, dobMonth, dobYear]);
+
+  // Sync locationInput into location state
+  useEffect(() => {
+    setLocation(locationInput);
+  }, [locationInput]);
+
+  // Debounced Location Autocomplete Fetching (OpenStreetMap Nominatim)
+  useEffect(() => {
+    const query = locationInput.trim();
+    if (query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=en`
+        );
+        if (!res.ok) throw new Error("Search failed");
+        const data = await res.json();
+
+        const items = data.map((item: any) => {
+          const addr = item.address;
+          const city = addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county;
+          const state = addr.state;
+          const country = addr.country;
+
+          let displayName = item.display_name;
+          if (city && country) {
+            displayName = state ? `${city}, ${state}, ${country}` : `${city}, ${country}`;
+          }
+
+          return {
+            id: item.place_id,
+            name: displayName,
+          };
+        });
+
+        setSuggestions(items);
+      } catch (err) {
+        console.error("Autocomplete fetch error:", err);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [locationInput]);
 
   // Prefill what we already have (name comes from the OAuth provider); bounce
   // out if there's no session, or if the profile is already complete.
@@ -59,8 +130,21 @@ export default function OnboardingPage() {
           (user.user_metadata?.name as string) ??
           "",
       );
-      if (profile?.dob) setDob(profile.dob);
-      if (profile?.location) setLocation(profile.location);
+
+      if (profile?.dob) {
+        const parts = profile.dob.split("-");
+        if (parts.length === 3) {
+          setDobYear(parts[0]);
+          setDobMonth(parts[1]);
+          setDobDay(parseInt(parts[2]).toString());
+        }
+      }
+      
+      if (profile?.location) {
+        setLocationInput(profile.location);
+        setLocation(profile.location);
+      }
+      
       setReady(true);
     })();
   }, [router]);
@@ -98,7 +182,7 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-left">
         <div>
           <FieldLabel>Full name</FieldLabel>
           <IconField
@@ -109,28 +193,111 @@ export default function OnboardingPage() {
             icon={<UserIcon className="h-4 w-4" />}
           />
         </div>
-        <div>
+
+        {/* Location Autocomplete Field */}
+        <div className="relative">
           <FieldLabel>Default location</FieldLabel>
-          <IconField
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="City, Country"
-            required
-            icon={<MapPinIcon className="h-4 w-4" />}
-          />
-        </div>
-        <div>
-          <FieldLabel>Date of birth</FieldLabel>
-          <FieldShell icon={<CalendarIcon className="h-4 w-4" />}>
+          <div className="relative">
+            <MapPinIcon className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
             <input
-              type="date"
-              className={bareInput}
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
+              type="text"
+              value={locationInput}
+              onChange={(e) => {
+                setLocationInput(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder="Start typing your city..."
+              className="w-full rounded-xl border border-slate-250 bg-white pl-10 pr-4 py-2.5 text-sm outline-none focus:border-brand-500"
               required
             />
-          </FieldShell>
+          </div>
+
+          {/* Autocomplete suggestions */}
+          {showSuggestions && suggestions.length > 0 && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowSuggestions(false)} />
+              <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg divide-y divide-slate-50">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      setLocationInput(s.name);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    <MapPinIcon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{s.name}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Date of Birth Field (Split Selects) */}
+        <div>
+          <FieldLabel>Date of birth</FieldLabel>
+          <div className="grid grid-cols-3 gap-2">
+            <select
+              value={dobDay}
+              onChange={(e) => setDobDay(e.target.value)}
+              className="rounded-xl border border-slate-250 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+              required
+            >
+              <option value="">Day</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={String(d).padStart(2, "0")}>
+                  {d}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={dobMonth}
+              onChange={(e) => setDobMonth(e.target.value)}
+              className="rounded-xl border border-slate-250 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+              required
+            >
+              <option value="">Month</option>
+              {[
+                { value: "01", label: "January" },
+                { value: "02", label: "February" },
+                { value: "03", label: "March" },
+                { value: "04", label: "April" },
+                { value: "05", label: "May" },
+                { value: "06", label: "June" },
+                { value: "07", label: "July" },
+                { value: "08", label: "August" },
+                { value: "09", label: "September" },
+                { value: "10", label: "October" },
+                { value: "11", label: "November" },
+                { value: "12", label: "December" },
+              ].map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={dobYear}
+              onChange={(e) => setDobYear(e.target.value)}
+              className="rounded-xl border border-slate-250 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+              required
+            >
+              <option value="">Year</option>
+              {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 10 - i).map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <div>
           <FieldLabel>Phone number</FieldLabel>
           <IconField
@@ -142,6 +309,7 @@ export default function OnboardingPage() {
             icon={<PhoneIcon className="h-4 w-4" />}
           />
         </div>
+
         <button type="submit" disabled={loading} className={primaryBtn}>
           {loading ? "Saving…" : "Finish setup"}
         </button>

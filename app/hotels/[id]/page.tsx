@@ -4,6 +4,7 @@ import { getPublicHotel } from "@/lib/hotels";
 import { MapPinIcon, StarIcon } from "@/components/icons";
 import { parseAmenities, getTopAmenities } from "@/lib/amenityCatalog";
 import { Price } from "@/components/Price";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 // Section Components
 import { Breadcrumb } from "./components/Breadcrumb";
@@ -170,6 +171,8 @@ export default async function HotelDetailPage({
           Book Now
         </a>
       </div>
+      
+      <AutoRefresh intervalMs={30000} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { MapPinIcon, CalendarIcon } from "@/components/icons";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import { CheckInQrCard } from "@/components/CheckInQrCard";
 import { ChevronLeft } from "lucide-react";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import QRCode from "qrcode";
 import {
   BOOKING_STATUS_STYLES,
@@ -227,6 +228,8 @@ export default async function BookingDetailPage({
           />
         </ScrollReveal>
       </div>
+
+      <AutoRefresh intervalMs={15000} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QrCode, Camera, Keyboard } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 const TABS = ["today", "occupancy", "bookings"] as const;
 type Tab = (typeof TABS)[number];
@@ -445,6 +446,8 @@ export function FrontDesk({
           </div>
         )}
       </Panel>
+      
+      <AutoRefresh intervalMs={15000} />
     </div>
   );
 }

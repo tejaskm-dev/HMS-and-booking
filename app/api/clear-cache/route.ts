@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { HOTELS_CACHE_TAG } from "@/lib/hotels";
 
 export const dynamic = "force-dynamic";
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     // Force purge the Next.js data cache for all hotels
-    updateTag(HOTELS_CACHE_TAG);
+    revalidateTag(HOTELS_CACHE_TAG);
 
     // Force purge the route caches
     revalidatePath("/", "layout");

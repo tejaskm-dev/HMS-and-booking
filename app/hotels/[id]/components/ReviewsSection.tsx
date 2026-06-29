@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { StarIcon } from "@/components/icons";
 import type { ReviewWithAuthor } from "@/lib/types";
 import { Section } from "./SectionWrapper";
+import { createClient } from "@/lib/supabase/client";
+import ReviewForm from "@/components/ReviewForm";
+import type { User } from "@supabase/supabase-js";
 import { X, Search, CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react";
 
 interface ReviewsSectionProps {
@@ -24,6 +27,47 @@ export function ReviewsSection({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
+
+  // Gating state
+  const [user, setUser] = useState<User | null>(null);
+  const [completedBookingsCount, setCompletedBookingsCount] = useState<number>(0);
+  const [userReviewsCount, setUserReviewsCount] = useState<number>(0);
+  const [loadingEligibility, setLoadingEligibility] = useState<boolean>(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    const checkEligibility = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+
+      if (currentUser) {
+        try {
+          const [bookingsRes, reviewsRes] = await Promise.all([
+            supabase
+              .from("bookings")
+              .select("*", { count: "exact", head: true })
+              .eq("guest_id", currentUser.id)
+              .eq("hotel_id", hotelId)
+              .eq("status", "completed"),
+            supabase
+              .from("reviews")
+              .select("*", { count: "exact", head: true })
+              .eq("user_id", currentUser.id)
+              .eq("hotel_id", hotelId)
+          ]);
+
+          setCompletedBookingsCount(bookingsRes.count || 0);
+          setUserReviewsCount(reviewsRes.count || 0);
+        } catch (err) {
+          console.error("Error checking eligibility:", err);
+        }
+      }
+      setLoadingEligibility(false);
+    };
+
+    checkEligibility();
+  }, [hotelId]);
 
   // Main page preview shows a maximum of 4 reviews (2x2 grid)
   const previewReviews = useMemo(() => {
@@ -233,21 +277,54 @@ export function ReviewsSection({
         </div>
       )}
 
-      {/* 3. Verified Security Banner (Replacing the raw public form) */}
+      {/* 3. Gated Review Submission Section */}
       <div className="mt-8 border-t border-slate-100 pt-6">
-        <div className="rounded-2xl bg-slate-50 border border-slate-200 p-6 flex items-start gap-4 shadow-sm">
-          <div className="shrink-0 text-slate-700 p-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <ShieldCheck className="h-6 w-6" />
-          </div>
-          <div>
-            <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-              Verified Reviews Only
-            </h4>
-            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
-              At BookNest, we ensure all reviews are written by actual guests. To leave a review, please use the **Checkout QR Code** provided by the front desk staff during checkout, or submit it directly from your **Booking Details** portal once your stay is marked as completed.
+        {user ? (
+          loadingEligibility ? (
+            <div className="flex items-center gap-2 justify-center py-4">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-brand-600" />
+              <span className="text-xs text-slate-500 font-bold">Verifying eligibility...</span>
+            </div>
+          ) : completedBookingsCount > userReviewsCount ? (
+            <ReviewForm hotelId={hotelId} />
+          ) : completedBookingsCount > 0 ? (
+            <div className="rounded-2xl bg-brand-50/50 border border-brand-100 p-5 flex items-start gap-3">
+              <div className="shrink-0 text-brand-600 mt-0.5">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-800">Thank you for your feedback!</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  You have already reviewed your stay at this hotel. To write another review, you must complete a new booking.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-6 flex items-start gap-4 shadow-sm">
+              <div className="shrink-0 text-slate-700 p-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                  Verified Reviews Only
+                </h4>
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
+                  At BookNest, we ensure all reviews are written by actual guests. To leave a review, please use the **Checkout QR Code** provided by the front desk staff during checkout, or submit it directly from your **Booking Details** portal once your stay is marked as completed.
+                </p>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-center">
+            <p className="text-xs text-slate-500 font-bold">
+              Please{" "}
+              <a href={`/login?redirect=/hotels/${hotelId}`} className="text-brand-600 hover:underline">
+                log in
+              </a>{" "}
+              to write a review. Gated to verified guests only.
             </p>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 4. Airbnb-style Review Explorer Modal */}

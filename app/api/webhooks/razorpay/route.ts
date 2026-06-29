@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendBookingConfirmation } from "@/lib/emails/bookingConfirmation";
+import { sendRefundProcessed } from "@/lib/emails/refundProcessed";
 
 // POST /api/webhooks/razorpay — server-authoritative payment confirmation.
 // Razorpay calls this; we verify the signature against RAZORPAY_WEBHOOK_SECRET,
@@ -78,6 +80,8 @@ export async function POST(request: Request) {
           .update({ status: "confirmed" })
           .eq("id", bookingId)
           .eq("status", "pending");
+        // Fire the confirmation email (idempotent — safe if reconcile also runs).
+        await sendBookingConfirmation(bookingId);
       }
       break;
     }
@@ -99,6 +103,8 @@ export async function POST(request: Request) {
           .from("payments")
           .update({ status: "refunded", refunded_at: new Date().toISOString() })
           .eq("booking_id", bookingId);
+        // Idempotent — guarded so created+processed don't double-send.
+        await sendRefundProcessed(bookingId);
       }
       break;
     }

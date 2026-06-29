@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { reconcilePendingBooking } from "@/lib/reconcile";
+import { sendBookingConfirmation } from "@/lib/emails/bookingConfirmation";
 
 // POST /api/payments/razorpay/reconcile — manually re-check a pending booking's
 // payment with Razorpay and confirm it if captured (webhook replacement).
@@ -39,5 +40,9 @@ export async function POST(request: Request) {
   const orderId = (booking.payments as { order_id: string | null }[] | null)?.[0]
     ?.order_id;
   const confirmed = await reconcilePendingBooking(supabase, bookingId, orderId ?? null);
+  if (confirmed) {
+    // Idempotent — no-op if the webhook already sent it.
+    await sendBookingConfirmation(bookingId);
+  }
   return NextResponse.json({ confirmed });
 }

@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, phone")
     .eq("id", user.id)
     .single();
 
@@ -56,6 +56,12 @@ export async function GET(request: Request) {
     return NextResponse.redirect(
       `${origin}${status === "approved" ? "/manager/dashboard" : "/manager/waiting"}`,
     );
+  }
+
+  // Guest. OAuth sign-ups land here with an incomplete profile (no phone),
+  // so send them through onboarding to collect the remaining details first.
+  if (!profile?.phone) {
+    return NextResponse.redirect(`${origin}/onboarding`);
   }
 
   return NextResponse.redirect(`${origin}/`);

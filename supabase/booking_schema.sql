@@ -20,7 +20,7 @@ create table if not exists public.bookings (
   check_out           date not null,
   nights              int not null,
   guest_count         int not null default 1,
-  num_rooms           int not null default 1,
+  num_rooms           int not nu ll default 1,
   room_price          numeric(10, 2) not null,   -- snapshot of the nightly price (base currency)
   base_price          numeric(10, 2) not null,   -- room_price * num_rooms * nights
   gst                 numeric(10, 2) not null,    -- 18%

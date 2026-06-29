@@ -91,6 +91,36 @@ export async function signUpManager(input: ManagerSignupInput) {
   return data;
 }
 
+// OAuth providers (Google etc.) only hand over email + name, so the
+// `handle_new_user` trigger creates a profile with empty phone/dob/location.
+// This fills in the missing fields once the user goes through /onboarding.
+export interface ProfileCompletionInput {
+  fullName: string;
+  dob: string;
+  phone: string;
+  location: string;
+}
+
+export async function completeProfile(input: ProfileCompletionInput) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: input.fullName,
+      dob: input.dob || null,
+      phone: input.phone,
+      location: input.location,
+    })
+    .eq("id", user.id);
+
+  if (error) throw error;
+}
+
 // ---------------------------------------------------------------------------
 // Sign in / out
 // ---------------------------------------------------------------------------

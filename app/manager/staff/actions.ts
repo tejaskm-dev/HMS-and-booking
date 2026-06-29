@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendStaffInvite } from "@/lib/emails/staffInvite";
 import type { StaffPermission } from "@/lib/types";
 
 export interface ActionResult {
@@ -38,6 +39,12 @@ export async function inviteStaff(
 
   const { error } = await supabase.from("staff_invites").insert(rows);
   if (error) return { ok: false, error: error.message };
+
+  await sendStaffInvite({
+    email: clean,
+    hotelIds: hotelAccess.map((h) => h.hotelId),
+    inviterId: user.id,
+  });
 
   revalidatePath("/manager/staff");
   return { ok: true };

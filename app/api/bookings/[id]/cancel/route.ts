@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { razorpay } from "@/lib/razorpay";
+import { sendBookingCancellation } from "@/lib/emails/bookingCancellation";
 
 // PUT /api/bookings/[id]/cancel — cancel, release inventory, compute refund,
 // and (if a Razorpay payment was captured) issue a proportional refund.
@@ -60,6 +61,8 @@ export async function PUT(
       refundError = e instanceof Error ? e.message : "Refund could not be processed";
     }
   }
+
+  await sendBookingCancellation(id);
 
   return NextResponse.json({ ...data, refundError });
 }

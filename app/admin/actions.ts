@@ -3,6 +3,8 @@
 import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { HOTELS_CACHE_TAG } from "@/lib/hotels";
+import { sendManagerDecision } from "@/lib/emails/managerVerification";
+import { sendListingDecision } from "@/lib/emails/listingDecision";
 import type { UserRole, VerificationStatus } from "@/lib/types";
 
 export interface ActionResult {
@@ -18,6 +20,7 @@ export async function reviewManager(
   const supabase = await createClient();
   const { error } = await supabase.rpc("admin_review_manager", { p_id: id, p_decision: decision, p_note: note ?? null });
   if (error) return { ok: false, error: error.message };
+  await sendManagerDecision(id, decision, note);
   return { ok: true };
 }
 
@@ -30,6 +33,7 @@ export async function reviewHotel(
   const { error } = await supabase.rpc("admin_review_hotel", { p_id: id, p_decision: decision, p_reason: reason ?? null });
   if (error) return { ok: false, error: error.message };
   updateTag(HOTELS_CACHE_TAG);
+  await sendListingDecision(id, decision, reason);
   return { ok: true };
 }
 

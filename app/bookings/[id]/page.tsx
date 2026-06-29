@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { reconcilePendingBooking } from "@/lib/reconcile";
+import { sendBookingConfirmation } from "@/lib/emails/bookingConfirmation";
 import { Price } from "@/components/Price";
 import { PriceBreakdown } from "@/components/PriceBreakdown";
 import { BookingActions } from "@/components/BookingActions";
@@ -59,6 +60,8 @@ export default async function BookingDetailPage({
       booking.payments?.[0]?.order_id ?? null,
     );
     if (confirmed) {
+      // Idempotent — no-op if the webhook/reconcile route already sent it.
+      await sendBookingConfirmation(booking.id);
       ({ data } = await supabase
         .from("bookings")
         .select(select)

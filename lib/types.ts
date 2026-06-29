@@ -259,6 +259,12 @@ export interface ReviewWithAuthor {
   created_at: string;
   reviewer_name: string | null;
   reviewer_since: string;
+  stay_details?: {
+    check_in: string;
+    check_out: string;
+    room_name: string;
+    nights: number | null;
+  } | null;
 }
 
 // A nearby landmark stored in hotels.nearby_places jsonb.

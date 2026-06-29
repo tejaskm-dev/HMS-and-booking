@@ -139,8 +139,36 @@ async function assembleHotelDetail(
 
   const photos = (photosData as HotelPhoto[] | null) ?? [];
   const rooms = (roomsData as RoomWithPhotos[] | null) ?? [];
-  const reviews = (reviewsData as ReviewWithAuthor[] | null) ?? [];
+  const rawReviews = (reviewsData as ReviewWithAuthor[] | null) ?? [];
   const availabilityRule = (availData as AvailabilityRule | null) ?? null;
+
+  // Fetch stay details for each review to display stay context (duration, room name)
+  let reviews: ReviewWithAuthor[] = [];
+  if (rawReviews.length > 0) {
+    const userIds = rawReviews.map((r) => r.user_id).filter(Boolean);
+    const { data: bookings } = await supabase
+      .from("bookings")
+      .select("guest_id, check_in, check_out, rooms (name)")
+      .eq("hotel_id", hotelId)
+      .in("guest_id", userIds)
+      .order("check_out", { ascending: false });
+
+    reviews = rawReviews.map((r) => {
+      // Find the latest booking for this reviewer
+      const b = bookings?.find((book) => book.guest_id === r.user_id);
+      return {
+        ...r,
+        stay_details: b ? {
+          check_in: b.check_in,
+          check_out: b.check_out,
+          room_name: (b.rooms as any)?.name || "Room",
+          nights: b.check_in && b.check_out 
+            ? Math.round((new Date(b.check_out).getTime() - new Date(b.check_in).getTime()) / (1000 * 60 * 60 * 24))
+            : null
+        } : null
+      };
+    });
+  }
 
   // 3. Fetch host profile from public_profiles view
   let host: PublicProfile | null = null;

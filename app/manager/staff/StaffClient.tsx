@@ -205,7 +205,7 @@ export function StaffClient({
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         title="Invite staff"
-        widthClassName="md:w-[35rem]"
+        widthClassName="md:w-[42rem] md:max-w-[90vw]"
       >
         <InviteForm hotels={hotels} onDone={() => setInviteOpen(false)} />
       </Panel>
@@ -571,152 +571,157 @@ function InviteForm({
           </label>
         )}
 
-        {/* Permissions Grid Header */}
-        <div className="grid grid-cols-[1fr_80px_80px_80px] gap-2 items-center px-4 py-2 text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 bg-slate-50/60 rounded-t-xl">
-          <div>Hotel</div>
-          <div className="text-center flex items-center justify-center gap-0.5">
-            View occ <Info className="h-3 w-3 text-slate-400" />
-          </div>
-          <div className="text-center flex items-center justify-center gap-0.5">
-            Rooms <Info className="h-3 w-3 text-slate-400" />
-          </div>
-          <div className="text-center flex items-center justify-center gap-0.5">
-            Offline <Info className="h-3 w-3 text-slate-400" />
-          </div>
-        </div>
+        {/* Scrollable Grid Container */}
+        <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-xs">
+          <div className="min-w-[480px]">
+            {/* Permissions Grid Header */}
+            <div className="grid grid-cols-[1fr_85px_85px_85px] gap-2 items-center px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-150/70 bg-slate-50/60">
+              <div>Hotel</div>
+              <div className="text-center flex items-center justify-center gap-0.5">
+                View occ <Info className="h-3 w-3 text-slate-400" />
+              </div>
+              <div className="text-center flex items-center justify-center gap-0.5">
+                Rooms <Info className="h-3 w-3 text-slate-400" />
+              </div>
+              <div className="text-center flex items-center justify-center gap-0.5">
+                Offline <Info className="h-3 w-3 text-slate-400" />
+              </div>
+            </div>
 
-        {/* Scrollable Hotels list */}
-        <div className="border border-t-0 border-slate-200 rounded-b-xl max-h-[360px] overflow-y-auto bg-white divide-y divide-slate-100 shadow-inner">
-          {filteredHotels.length === 0 ? (
-            <p className="py-10 text-center text-xs text-slate-400 font-semibold">No hotels match your search.</p>
-          ) : (
-            filteredHotels.map((h) => {
-              const access = hotelAccess[h.id];
-              const isChecked = access?.enabled;
+            {/* Hotels list */}
+            <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
+              {filteredHotels.length === 0 ? (
+                <p className="py-10 text-center text-xs text-slate-400 font-semibold">No hotels match your search.</p>
+              ) : (
+                filteredHotels.map((h) => {
+                  const access = hotelAccess[h.id];
+                  const isChecked = access?.enabled;
 
-              return (
-                <div
-                  key={h.id}
-                  className={`grid grid-cols-[1fr_80px_80px_80px] gap-2 items-center px-4 py-3.5 hover:bg-slate-50/40 transition ${
-                    isChecked ? "bg-slate-50/20" : ""
-                  }`}
-                >
-                  {/* Hotel info */}
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleHotelToggle(h.id)}
-                      className="rounded border-slate-300 text-brand-650 focus:ring-brand-500 accent-brand-600 shrink-0"
-                    />
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
-                      {h.image_url ? (
-                        <Image src={h.image_url} alt={h.name} fill className="object-cover" />
-                      ) : (
-                        <div className="grid h-full w-full place-items-center text-slate-300">
-                          <Building className="h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <span className="block text-xs font-bold text-slate-900 truncate">{h.name}</span>
-                      <span className="block text-[10px] font-semibold text-slate-450 truncate mt-0.5">
-                        {h.location}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Three Permission toggles with dropdowns */}
-                  {PERMISSIONS_CONFIG.map((col) => {
-                    const isPermOn = isChecked && access.permissions.includes(col.key);
-                    const activeSubCount = isChecked
-                      ? access.permissions.filter((p) => p.startsWith(`${col.key}:`)).length
-                      : 0;
-
-                    const isOpen = activePopover?.hotelId === h.id && activePopover?.permKey === col.key;
-
-                    return (
-                      <div key={col.key} className="flex items-center justify-center gap-1 relative">
-                        {/* Toggle Switch */}
-                        <button
-                          type="button"
-                          disabled={!isChecked}
-                          onClick={() => handleMainPermToggle(h.id, col.key)}
-                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
-                            isPermOn ? "bg-green-600" : "bg-slate-200"
-                          } disabled:opacity-30 disabled:cursor-not-allowed`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                              isPermOn ? "translate-x-4" : "translate-x-0"
-                            }`}
-                          />
-                        </button>
-
-                        {/* Chevron Trigger */}
-                        <button
-                          type="button"
-                          disabled={!isChecked}
-                          onClick={() => {
-                            if (isOpen) {
-                              setActivePopover(null);
-                            } else {
-                              setActivePopover({ hotelId: h.id, permKey: col.key });
-                            }
-                          }}
-                          className="p-1 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition disabled:opacity-25"
-                        >
-                          <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180 text-slate-700" : ""}`} />
-                        </button>
-
-                        {/* Floating Sub-permissions Popover */}
-                        {isOpen && (
-                          <>
-                            <div className="fixed inset-0 z-40" onClick={() => setActivePopover(null)} />
-                            <div className="absolute top-full right-0 z-50 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl text-left border-t border-slate-150">
-                              <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1">
-                                <Settings className="h-3.5 w-3.5 text-brand-600" /> {col.label} settings
-                              </h4>
-                              <div className="space-y-3">
-                                {col.subPerms.map((sub) => {
-                                  const isSubOn = access.permissions.includes(sub.key);
-                                  return (
-                                    <label
-                                      key={sub.key}
-                                      className="flex items-start gap-2.5 cursor-pointer select-none group"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={isSubOn}
-                                        onChange={() => handleSubPermToggle(h.id, col.key, sub.key)}
-                                        className="mt-0.5 rounded border-slate-300 text-brand-650 focus:ring-brand-500 accent-brand-600 shrink-0"
-                                      />
-                                      <div className="text-xs">
-                                        <span className="block font-bold text-slate-800 group-hover:text-brand-700 transition">
-                                          {sub.label}
-                                        </span>
-                                        <span className="block text-[10px] text-slate-450 mt-0.5 leading-normal">
-                                          {sub.desc}
-                                        </span>
-                                      </div>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                              <div className="border-t border-slate-100 mt-4 pt-2.5 flex justify-between text-[10px] font-bold text-slate-450">
-                                <span>Selected</span>
-                                <span className="text-brand-700">{activeSubCount} of {col.subPerms.length}</span>
-                              </div>
+                  return (
+                    <div
+                      key={h.id}
+                      className={`grid grid-cols-[1fr_85px_85px_85px] gap-2 items-center px-4 py-3.5 hover:bg-slate-50/40 transition ${
+                        isChecked ? "bg-slate-50/20" : ""
+                      }`}
+                    >
+                      {/* Hotel info */}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleHotelToggle(h.id)}
+                          className="rounded border-slate-300 text-brand-650 focus:ring-brand-500 accent-brand-600 shrink-0"
+                        />
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
+                          {h.image_url ? (
+                            <Image src={h.image_url} alt={h.name} fill className="object-cover" />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center text-slate-300">
+                              <Building className="h-5 w-5" />
                             </div>
-                          </>
-                        )}
+                          )}
+                        </div>
+                        <div className="min-w-0 text-left">
+                          <span className="block text-xs font-bold text-slate-900 truncate">{h.name}</span>
+                          <span className="block text-[10px] font-semibold text-slate-450 truncate mt-0.5">
+                            {h.location}
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              );
-            })
-          )}
+
+                      {/* Three Permission toggles with dropdowns */}
+                      {PERMISSIONS_CONFIG.map((col) => {
+                        const isPermOn = isChecked && access.permissions.includes(col.key);
+                        const activeSubCount = isChecked
+                          ? access.permissions.filter((p) => p.startsWith(`${col.key}:`)).length
+                          : 0;
+
+                        const isOpen = activePopover?.hotelId === h.id && activePopover?.permKey === col.key;
+
+                        return (
+                          <div key={col.key} className="flex items-center justify-center gap-1 relative">
+                            {/* Toggle Switch */}
+                            <button
+                              type="button"
+                              disabled={!isChecked}
+                              onClick={() => handleMainPermToggle(h.id, col.key)}
+                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                                isPermOn ? "bg-green-600" : "bg-slate-200"
+                              } disabled:opacity-30 disabled:cursor-not-allowed`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                  isPermOn ? "translate-x-4" : "translate-x-0"
+                                }`}
+                              />
+                            </button>
+
+                            {/* Chevron Trigger */}
+                            <button
+                              type="button"
+                              disabled={!isChecked}
+                              onClick={() => {
+                                if (isOpen) {
+                                  setActivePopover(null);
+                                } else {
+                                  setActivePopover({ hotelId: h.id, permKey: col.key });
+                                }
+                              }}
+                              className="p-1 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition disabled:opacity-25"
+                            >
+                              <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180 text-slate-700" : ""}`} />
+                            </button>
+
+                            {/* Floating Sub-permissions Popover */}
+                            {isOpen && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setActivePopover(null)} />
+                                <div className="absolute top-full right-0 z-50 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl text-left border-t border-slate-150">
+                                  <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1">
+                                    <Settings className="h-3.5 w-3.5 text-brand-600" /> {col.label} settings
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {col.subPerms.map((sub) => {
+                                      const isSubOn = access.permissions.includes(sub.key);
+                                      return (
+                                        <label
+                                          key={sub.key}
+                                          className="flex items-start gap-2.5 cursor-pointer select-none group"
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={isSubOn}
+                                            onChange={() => handleSubPermToggle(h.id, col.key, sub.key)}
+                                            className="mt-0.5 rounded border-slate-300 text-brand-650 focus:ring-brand-500 accent-brand-600 shrink-0"
+                                          />
+                                          <div className="text-xs">
+                                            <span className="block font-bold text-slate-800 group-hover:text-brand-700 transition">
+                                              {sub.label}
+                                            </span>
+                                            <span className="block text-[10px] text-slate-455 mt-0.5 leading-normal">
+                                              {sub.desc}
+                                            </span>
+                                          </div>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="border-t border-slate-100 mt-4 pt-2.5 flex justify-between text-[10px] font-bold text-slate-450">
+                                    <span>Selected</span>
+                                    <span className="text-brand-700">{activeSubCount} of {col.subPerms.length}</span>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

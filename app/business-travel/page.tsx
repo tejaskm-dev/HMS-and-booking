@@ -1,12 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { toHotelCard } from "@/lib/hotels";
 import { HotelCard } from "@/components/HotelCard";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import { Briefcase, Wifi, Shield, CreditCard, ChevronRight, CheckCircle2 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+// Public marketing page — cookie-free data, so it can be CDN-cached (ISR).
+export const revalidate = 300;
 
 const ADVANTAGES = [
   {
@@ -32,7 +33,7 @@ const ADVANTAGES = [
 ];
 
 export default async function BusinessTravelPage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: hotelsData } = await supabase
     .from("hotels")
     .select("*, reviews(*), rooms(*)")

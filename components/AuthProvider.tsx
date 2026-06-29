@@ -51,9 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
+    // getSession() reads the token from local storage (instant, no network
+    // round-trip), unlike getUser() which validates against Supabase's servers
+    // on every page. For client-side UI state this is the recommended call;
+    // anything security-sensitive is enforced server-side / by RLS anyway.
     const {
-      data: { user: currentUser },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const currentUser = session?.user ?? null;
     setUser(currentUser);
     await loadProfile(currentUser);
   }, [loadProfile]);

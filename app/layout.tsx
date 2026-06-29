@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
 import { Navbar } from "@/components/Navbar";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
@@ -37,6 +38,7 @@ export default function RootLayout({
           <CurrencyProvider>
             <Navbar />
             <main className="flex-1">{children}</main>
+            <CookieConsent />
           </CurrencyProvider>
         </AuthProvider>
       </body>

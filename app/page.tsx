@@ -1,13 +1,14 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { HotelCard } from "@/components/HotelCard";
 import { AirbnbSearch } from "@/components/AirbnbSearch";
 import { Footer } from "@/components/Footer";
 import { LandingPageLoader } from "@/components/LandingPageLoader";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 import { toHotelCard, getApprovedHotelsCached } from "@/lib/hotels";
-import type { HotelCardData, HotelWithStats } from "@/lib/types";
+import type { HotelWithStats } from "@/lib/types";
 import { getOptimizedImageUrl } from "@/lib/image";
-import { FeaturedStaysSection } from "@/components/FeaturedStaysSection";
+import { HomeStays, type HomeStay } from "@/components/HomeStays";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import {
   AnimatedShieldCheck,
   AnimatedTag,
@@ -18,48 +19,25 @@ import {
 import { ArrowRight } from "lucide-react";
 import DestinationsMapWrapper from "@/components/DestinationsMapWrapper";
 
-export const dynamic = "force-dynamic";
+// ISR: the catalog is cookie-free + cached and all filtering now happens
+// client-side in <HomeStays>, so this page is statically rendered and served
+// from the CDN, regenerating at most once a minute.
+export const revalidate = 60;
 
-interface SearchParams {
-  location?: string;
-  type?: string;
-  checkIn?: string;
-  checkOut?: string;
-  guests?: string;
-}
-
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const { location, type } = await searchParams;
-
-  // Read the catalog from cache
-  let hotels: HotelCardData[] = [];
+export default async function HomePage() {
+  // Read the full catalog from cache. The ?location/?type search is applied in
+  // the browser by <HomeStays>, keeping this render param-independent (static).
+  let allHotels: HomeStay[] = [];
   let allApprovedHotels: HotelWithStats[] = [];
   let error = false;
   try {
     allApprovedHotels = await getApprovedHotelsCached();
-    
-    let matched = allApprovedHotels;
-    
-    const term = location?.trim().toLowerCase();
-    if (term) {
-      const words = term.replace(/[,()]/g, " ").split(/\s+/).filter(Boolean);
-      matched = matched.filter((h) => {
-        const target = `${h.name ?? ""} ${h.location ?? ""} ${h.city ?? ""} ${h.state ?? ""}`.toLowerCase();
-        return words.every((word) => target.includes(word));
-      });
-    }
-    
-    if (type) {
-      matched = matched.filter((h) =>
-        h.property_type?.toLowerCase() === type.toLowerCase()
-      );
-    }
-    
-    hotels = matched.map(toHotelCard);
+    allHotels = allApprovedHotels.map((h) => ({
+      ...toHotelCard(h),
+      city: h.city ?? null,
+      state: h.state ?? null,
+      property_type: h.property_type ?? null,
+    }));
   } catch {
     error = true;
   }
@@ -125,17 +103,9 @@ export default async function HomePage({
     };
   });
 
-  // 3. Sort and select top 10 featured stays based on weighted rating score
-  const sortedFeaturedStays = [...hotels]
-    .sort((a, b) => {
-      const scoreA = (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 20) * 0.5;
-      const scoreB = (b.rating || 0) * 10 + Math.min(b.reviewCount || 0, 20) * 0.5;
-      return scoreB - scoreA;
-    })
-    .slice(0, 10);
-
   return (
     <div className="relative flex flex-col min-h-screen bg-[#F8F7F4] overflow-hidden">
+      <AutoRefresh />
       <LandingPageLoader />
 
       {/* Background Layer: Faint Organic Leaves */}
@@ -186,66 +156,15 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Recommended/Featured Stays */}
-      <section id="hotels" className="relative z-10 mx-auto max-w-7xl w-full px-4 py-8 scroll-mt-20">
-        <ScrollReveal>
-          <div className="mb-6 flex items-baseline justify-between border-b border-slate-200/60 pb-4">
-            <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight font-serif">
-                {location ? `Stays in “${location}”` : "Featured stays"}
-              </h2>
-              <p className="mt-1 text-sm text-slate-500 font-bold">
-                {location
-                  ? `Showing available properties in ${location}`
-                  : "Curated stays we think you'll love"}
-              </p>
-            </div>
-            {location ? (
-              <span className="text-sm font-black text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-100">
-                {hotels.length} {hotels.length === 1 ? "stay" : "stays"} found
-              </span>
-            ) : (
-              <Link
-                href="/hotels"
-                className="text-sm font-black text-brand-700 hover:text-brand-600 transition flex items-center gap-1 group"
-              >
-                View all properties
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            )}
-          </div>
-        </ScrollReveal>
-
-        {error ? (
-          <EmptyState
-            title="Couldn't load hotels"
-            body="Check that your Supabase keys are set and the schema has been applied."
-          />
-        ) : hotels.length === 0 ? (
-          <EmptyState
-            title="No hotels found"
-            body={
-              location
-                ? "Try a different search term, or clear the search to view all stays."
-                : "Once managers publish and approve hotels, they'll show up here."
-            }
-          />
-        ) : location ? (
-          /* Grid Layout for Active Search Results */
-          <div className="relative">
-            <StaggerContainer className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {hotels.map((hotel) => (
-                <StaggerItem key={hotel.id}>
-                  <HotelCard hotel={hotel} />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        ) : (
-          /* Horizontal Slider for Homepage Featured Stays */
-          <FeaturedStaysSection hotels={sortedFeaturedStays} totalCount={hotels.length} />
-        )}
-      </section>
+      {/* Recommended/Featured Stays — filtering runs client-side so the page
+          stays static. Suspense keeps useSearchParams from de-opting it. */}
+      <Suspense
+        fallback={
+          <div className="relative z-10 mx-auto max-w-7xl w-full px-4 py-8 min-h-[520px]" />
+        }
+      >
+        <HomeStays allHotels={allHotels} error={error} />
+      </Suspense>
 
       {/* Promo Banner Trio - Split Layout */}
       <section className="relative z-10 mx-auto max-w-7xl w-full px-4 py-12">
@@ -468,18 +387,3 @@ function FaintLeaf({ className }: { className: string }) {
   );
 }
 
-function EmptyState({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="grid place-items-center rounded-3xl border border-dashed border-slate-300 bg-white py-20 px-6 text-center max-w-xl mx-auto w-full my-8 shadow-xs">
-      <div className="grid h-12 w-12 place-items-center rounded-full bg-brand-50 text-brand-600 mb-4">
-        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
-      <p className="text-lg font-bold text-slate-900">{title}</p>
-      <p className="mt-2 text-sm text-slate-500 max-w-sm font-medium">{body}</p>
-    </div>
-  );
-}

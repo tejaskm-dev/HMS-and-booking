@@ -11,7 +11,10 @@ import { HotelPhotosHeader } from "./components/HotelPhotosHeader";
 import { TitleActions } from "./components/TitleActions";
 import { ListingTabContainer } from "./components/ListingTabContainer";
 
-export const dynamic = "force-dynamic";
+// ISR: the common path (approved listing) is cookie-free + cached, so the
+// rendered page is CDN-cached and refreshed at most once a minute. The rare
+// owner-preview fallback reads cookies and degrades to a dynamic render.
+export const revalidate = 60;
 
 export default async function HotelDetailPage({
   params,

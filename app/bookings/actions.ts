@@ -77,6 +77,7 @@ export async function submitGuestReviewAndCheckout(
 
     // Revalidate paths to update cached views
     revalidatePath(`/bookings/${bookingId}`);
+    revalidatePath(`/hotels/${booking.hotel_id}`);
     revalidatePath(`/manager/manage/${booking.hotel_id}`);
 
     return { ok: true };

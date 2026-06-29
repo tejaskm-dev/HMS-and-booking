@@ -2,7 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { HOTELS_CACHE_TAG } from "@/lib/hotels";
 
 export interface ActionResult {
   ok: boolean;
@@ -75,10 +76,11 @@ export async function submitGuestReviewAndCheckout(
       }
     }
 
-    // Revalidate paths to update cached views
+    // Revalidate paths and tags to update cached views
     revalidatePath(`/bookings/${bookingId}`);
     revalidatePath(`/hotels/${booking.hotel_id}`);
     revalidatePath(`/manager/manage/${booking.hotel_id}`);
+    updateTag(HOTELS_CACHE_TAG);
 
     return { ok: true };
   } catch (err) {

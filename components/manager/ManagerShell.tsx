@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { AnimatePresence, motion } from "motion/react";
 import { SWRConfig, preload } from "swr";
 import { usePathname, useRouter } from "next/navigation";
 import { fetcher, managerApiForRoute } from "@/lib/swr";
@@ -124,38 +125,56 @@ export function ManagerShell({
       </aside>
 
       {/* Mobile slide-over sidebar */}
-      {mobileNavOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setMobileNavOpen(false)} />
-          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-white shadow-xl">
-            <div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
-              <Link href="/" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
-                <Image src="/logo-mark.png" alt="BookNest" width={28} height={28} className="h-7 w-7 object-contain" />
-                <span className="font-serif text-lg font-bold text-slate-900">BookNest</span>
-              </Link>
-              <button onClick={() => setMobileNavOpen(false)} className="p-1 text-slate-500" aria-label="Close menu">
-                <XIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto">{SidebarBody}</div>
-            <div className="space-y-1 border-t border-slate-200 p-3">
-              <Link
-                href="/"
-                onClick={() => setMobileNavOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100"
-              >
-                <GlobeIcon className="h-[18px] w-[18px]" /> View site
-              </Link>
-              <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
-                  {userName.slice(0, 1).toUpperCase()}
-                </div>
-                <span className="truncate text-sm font-medium text-slate-700">{userName}</span>
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0 bg-slate-900/40"
+              onClick={() => setMobileNavOpen(false)}
+            />
+            
+            {/* Sidebar Slide-in */}
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="absolute left-0 top-0 flex h-full w-64 flex-col bg-white shadow-xl"
+            >
+              <div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
+                <Link href="/" className="flex items-center gap-2" onClick={() => setMobileNavOpen(false)}>
+                  <Image src="/logo-mark.png" alt="BookNest" width={28} height={28} className="h-7 w-7 object-contain" />
+                  <span className="font-serif text-lg font-bold text-slate-900">BookNest</span>
+                </Link>
+                <button onClick={() => setMobileNavOpen(false)} className="p-1 text-slate-500" aria-label="Close menu">
+                  <XIcon className="h-5 w-5" />
+                </button>
               </div>
-            </div>
-          </aside>
-        </div>
-      )}
+              <div className="flex-1 overflow-y-auto">{SidebarBody}</div>
+              <div className="space-y-1 border-t border-slate-200 p-3">
+                <Link
+                  href="/"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100"
+                >
+                  <GlobeIcon className="h-[18px] w-[18px]" /> View site
+                </Link>
+                <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
+                    {userName.slice(0, 1).toUpperCase()}
+                  </div>
+                  <span className="truncate text-sm font-medium text-slate-700">{userName}</span>
+                </div>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">

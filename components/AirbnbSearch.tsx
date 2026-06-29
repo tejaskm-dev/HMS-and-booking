@@ -10,6 +10,7 @@ import {
   CalendarIcon,
   PlusIcon,
   MinusIcon,
+  XIcon,
 } from "@/components/icons";
 import { RangeCalendar } from "@/components/RangeCalendar";
 import { ymd } from "@/lib/booking";
@@ -172,6 +173,95 @@ export function AirbnbSearch() {
 
   const expanded = active !== null;
 
+  const renderPanel = (type: Segment) => {
+    if (type === "where") {
+      return (
+        <>
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+            Suggested destinations
+          </p>
+          {filteredSuggestions.length === 0 ? (
+            <p className="px-1 py-4 text-sm text-slate-400">
+              No destinations match your search.
+            </p>
+          ) : (
+            <ul className="space-y-1 max-h-60 overflow-y-auto pr-1 scrollbar-thin focus-visible:outline-none">
+              {filteredSuggestions.map((s) => (
+                <li key={s}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent input focus loss from closing dropdown
+                      setLocation(s);
+                      setActive("when");
+                    }}
+                    onClick={() => {
+                      setLocation(s);
+                      setActive("when");
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 cursor-pointer"
+                  >
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500">
+                      <MapPinIcon className="h-5 w-5" />
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {s}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      );
+    }
+
+    if (type === "when") {
+      return (
+        <WhenPanel
+          checkIn={checkIn}
+          checkOut={checkOut}
+          onPick={pickDate}
+          onFlexRange={setRange}
+        />
+      );
+    }
+
+    if (type === "who") {
+      return (
+        <>
+          <GuestRow
+            label="Adults"
+            sub="Ages 13 or above"
+            value={guests.adults}
+            onChange={(v) => setGuests((g) => ({ ...g, adults: v }))}
+          />
+          <GuestRow
+            label="Children"
+            sub="Ages 2–12"
+            value={guests.children}
+            onChange={(v) => setGuests((g) => ({ ...g, children: v }))}
+          />
+          <GuestRow
+            label="Infants"
+            sub="Under 2"
+            value={guests.infants}
+            onChange={(v) => setGuests((g) => ({ ...g, infants: v }))}
+          />
+          <GuestRow
+            label="Pets"
+            sub="Service animals welcome"
+            value={guests.pets}
+            onChange={(v) => setGuests((g) => ({ ...g, pets: v }))}
+            last
+          />
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div ref={rootRef} className="relative w-full max-w-3xl">
       <div
@@ -259,12 +349,12 @@ export function AirbnbSearch() {
         </div>
       </div>
 
-      {/* Popovers */}
+      {/* Desktop Popovers */}
       <AnimatePresence>
         {active && (
           <motion.div
-            key={active}
-            className={`fixed inset-x-4 top-24 md:absolute md:inset-x-0 md:top-full z-50 mt-3 flex ${
+            key={`desktop-${active}`}
+            className={`absolute top-full z-50 mt-3 hidden md:flex w-full ${
               active === "who"
                 ? "justify-end"
                 : active === "when"
@@ -286,86 +376,55 @@ export function AirbnbSearch() {
                     : "max-w-sm"
               }`}
             >
-              {active === "where" && (
-                <>
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Suggested destinations
-                  </p>
-                  {filteredSuggestions.length === 0 ? (
-                    <p className="px-1 py-4 text-sm text-slate-400">
-                      No destinations match your search.
-                    </p>
-                  ) : (
-                    <ul className="space-y-1 max-h-60 overflow-y-auto pr-1 scrollbar-thin focus-visible:outline-none">
-                      {filteredSuggestions.map((s) => (
-                        <li key={s}>
-                          <button
-                            type="button"
-                            onMouseDown={(e) => {
-                              e.preventDefault(); // Prevent input focus loss from closing dropdown
-                              setLocation(s);
-                              setActive("when");
-                            }}
-                            onClick={() => {
-                              setLocation(s);
-                              setActive("when");
-                            }}
-                            className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 cursor-pointer"
-                          >
-                            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500">
-                              <MapPinIcon className="h-5 w-5" />
-                            </span>
-                            <span className="text-sm font-semibold text-slate-800">
-                              {s}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </>
-              )}
-
-              {active === "when" && (
-                <WhenPanel
-                  checkIn={checkIn}
-                  checkOut={checkOut}
-                  onPick={pickDate}
-                  onFlexRange={setRange}
-                />
-              )}
-
-              {active === "who" && (
-                <>
-                  <GuestRow
-                    label="Adults"
-                    sub="Ages 13 or above"
-                    value={guests.adults}
-                    onChange={(v) => setGuests((g) => ({ ...g, adults: v }))}
-                  />
-                  <GuestRow
-                    label="Children"
-                    sub="Ages 2–12"
-                    value={guests.children}
-                    onChange={(v) => setGuests((g) => ({ ...g, children: v }))}
-                  />
-                  <GuestRow
-                    label="Infants"
-                    sub="Under 2"
-                    value={guests.infants}
-                    onChange={(v) => setGuests((g) => ({ ...g, infants: v }))}
-                  />
-                  <GuestRow
-                    label="Pets"
-                    sub="Service animals welcome"
-                    value={guests.pets}
-                    onChange={(v) => setGuests((g) => ({ ...g, pets: v }))}
-                    last
-                  />
-                </>
-              )}
+              {renderPanel(active)}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Sheet & Backdrop */}
+      <AnimatePresence>
+        {active && (
+          <>
+            {/* Mobile Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px] md:hidden"
+              onClick={() => setActive(null)}
+            />
+            {/* Mobile Drawer */}
+            <motion.div
+              key={`mobile-${active}`}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[32px] bg-white p-6 pb-8 shadow-[0_-10px_40px_rgba(14,56,41,0.15)] md:hidden max-h-[85vh] overflow-y-auto flex flex-col gap-4"
+            >
+              {/* Drag handle */}
+              <div className="mx-auto h-1.5 w-12 rounded-full bg-slate-200 shrink-0" />
+              {/* Title / Close */}
+              <div className="flex items-center justify-between shrink-0 border-b border-slate-100 pb-2">
+                <h3 className="font-serif text-lg font-bold text-slate-900">
+                  {active === "where" ? "Where to?" : active === "when" ? "Select dates" : "Who's coming?"}
+                </h3>
+                <button
+                  onClick={() => setActive(null)}
+                  className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100"
+                  aria-label="Close"
+                >
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto">
+                {renderPanel(active)}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

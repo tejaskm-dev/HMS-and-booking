@@ -23,12 +23,14 @@ export function Panel({
   footer?: React.ReactNode;
   widthClassName?: string;
 }) {
-  const [desktop, setDesktop] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [desktop, setDesktop] = useState(false);
 
   useEffect(() => {
     const m = window.matchMedia("(min-width: 768px)");
+    setDesktop(m.matches);
+    setMounted(true);
     const sync = () => setDesktop(m.matches);
-    sync();
     m.addEventListener("change", sync);
     return () => m.removeEventListener("change", sync);
   }, []);
@@ -41,8 +43,10 @@ export function Panel({
   }, [open, onClose]);
 
   const slide = desktop
-    ? { initial: { x: "100%" }, animate: { x: 0 }, exit: { x: "100%" } }
-    : { initial: { y: "100%" }, animate: { y: 0 }, exit: { y: "100%" } };
+    ? { initial: { x: "100%", y: 0 }, animate: { x: 0, y: 0 }, exit: { x: "100%", y: 0 } }
+    : { initial: { y: "100%", x: 0 }, animate: { y: 0, x: 0 }, exit: { y: "100%", x: 0 } };
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     // Force purge the Next.js data cache for all hotels
-    revalidateTag(HOTELS_CACHE_TAG);
+    revalidateTag(HOTELS_CACHE_TAG, "default");
 
     // Force purge the route caches
     revalidatePath("/", "layout");

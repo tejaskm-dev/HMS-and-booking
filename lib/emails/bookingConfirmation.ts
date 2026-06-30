@@ -10,6 +10,8 @@ const fmtDate = (d: string) =>
     year: "numeric",
   });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hms-and-booking.vercel.app";
+
 // Sends the "booking confirmed" email exactly once. Idempotent across the
 // webhook and the reconcile safety net: it atomically claims the send by
 // stamping confirmation_email_sent_at, and only the caller that wins the claim
@@ -59,6 +61,9 @@ export async function sendBookingConfirmation(bookingId: string): Promise<void> 
     const hotel = booking.hotels as { name?: string; location?: string } | null;
     const room = booking.rooms as { name?: string } | null;
 
+    const shortBookingId = booking.id.slice(0, 8).toUpperCase();
+    const qrData = `${siteUrl}/bookings/${booking.id}/check-in`;
+
     const html = emailLayout({
       eyebrow: "Reservation Confirmed",
       heading: "Your stay is booked!",
@@ -85,42 +90,42 @@ export async function sendBookingConfirmation(bookingId: string): Promise<void> 
           {
             label: "Hotel",
             value: `${hotel?.name ?? "—"}${hotel?.location ? `<br><span style="color:${BRAND.muted}; font-size:11px; font-weight:normal;">${hotel.location}</span>` : ""}`,
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f3e8.png",
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/hotel.png",
           },
           {
             label: "Room",
             value: `${room?.name ?? "—"}${booking.num_rooms > 1 ? ` × ${booking.num_rooms}` : ""}`,
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f6cc.png",
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/bed.png",
           },
           { 
             label: "Check-in", 
             value: `${fmtDate(booking.check_in as string)}<br><span style="color:${BRAND.muted}; font-size:11px; font-weight:normal;">02:00 PM onwards</span>`, 
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f4c5.png" 
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/calendar.png" 
           },
           { 
             label: "Check-out", 
             value: `${fmtDate(booking.check_out as string)}<br><span style="color:${BRAND.muted}; font-size:11px; font-weight:normal;">11:00 AM</span>`, 
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f4c5.png" 
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/calendar.png" 
           },
           { 
             label: "Nights", 
             value: `${booking.nights} Night${booking.nights > 1 ? "s" : ""}`, 
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f319.png" 
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/moon.png" 
           },
           {
             label: "Total paid",
             value: `<span style="font-weight:bold; color:${BRAND.green};">${inr(booking.total_price as number)}</span><br><span style="color:${BRAND.muted}; font-size:11px; font-weight:normal;">Paid via Online</span>`,
-            iconUrl: "https://abs.twimg.com/emoji/v2/72x72/1f4b3.png",
+            iconUrl: "https://img.icons8.com/ios-filled/50/C9A24D/credit-card.png",
           },
-        ], booking.id)}
+        ], qrData)}
 
-        <!-- Booking Reference Banner -->
+        <!-- Booking ID Banner -->
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px; border:1px solid ${BRAND.line}; border-radius:8px; background:#F8F7F4; overflow:hidden;">
           <tr>
             <td style="padding:16px 20px; font-size:12px; color:${BRAND.text}; text-align:left; vertical-align:middle;">
-              <img src="https://abs.twimg.com/emoji/v2/72x72/1f6e1.png" width="16" height="16" style="display:inline-block; vertical-align:middle; margin-right:8px;" />
-              <strong style="text-transform:uppercase; font-size:10px; letter-spacing:1.5px; color:${BRAND.muted}; margin-right:12px; vertical-align:middle;">Booking Reference</strong>
-              <span style="font-family:monospace; font-size:12px; font-weight:bold; color:${BRAND.text}; vertical-align:middle;">${booking.id}</span>
+              <img src="https://img.icons8.com/ios-filled/50/C9A24D/shield.png" width="16" height="16" style="display:inline-block; vertical-align:middle; margin-right:8px;" />
+              <strong style="text-transform:uppercase; font-size:10px; letter-spacing:1.5px; color:${BRAND.muted}; margin-right:12px; vertical-align:middle;">Booking ID</strong>
+              <span style="font-family:monospace; font-size:12px; font-weight:bold; color:${BRAND.text}; vertical-align:middle;">${shortBookingId}</span>
             </td>
           </tr>
         </table>

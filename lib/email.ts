@@ -178,19 +178,19 @@ export function emailLayout(opts: {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" width="25%" style="font-family:${SANS}; font-size:9px; font-weight:bold; color:#ffffff; letter-spacing:1px; text-transform:uppercase; padding:0 4px; vertical-align:middle;">
-                    <img src="https://abs.twimg.com/emoji/v2/72x72/1f3f7.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
+                    <img src="https://img.icons8.com/ios-filled/50/C9A24D/price-tag.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
                     <span style="vertical-align:middle;">Best Price</span>
                   </td>
                   <td align="center" width="25%" style="font-family:${SANS}; font-size:9px; font-weight:bold; color:#ffffff; letter-spacing:1px; text-transform:uppercase; padding:0 4px; border-left:1px solid rgba(255,255,255,0.15); vertical-align:middle;">
-                    <img src="https://abs.twimg.com/emoji/v2/72x72/1f6e1.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
+                    <img src="https://img.icons8.com/ios-filled/50/C9A24D/shield.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
                     <span style="vertical-align:middle;">Secure Stays</span>
                   </td>
                   <td align="center" width="25%" style="font-family:${SANS}; font-size:9px; font-weight:bold; color:#ffffff; letter-spacing:1px; text-transform:uppercase; padding:0 4px; border-left:1px solid rgba(255,255,255,0.15); vertical-align:middle;">
-                    <img src="https://abs.twimg.com/emoji/v2/72x72/1f3a7.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
+                    <img src="https://img.icons8.com/ios-filled/50/C9A24D/headset.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
                     <span style="vertical-align:middle;">24/7 Support</span>
                   </td>
                   <td align="center" width="25%" style="font-family:${SANS}; font-size:9px; font-weight:bold; color:#ffffff; letter-spacing:1px; text-transform:uppercase; padding:0 4px; border-left:1px solid rgba(255,255,255,0.15); vertical-align:middle;">
-                    <img src="https://abs.twimg.com/emoji/v2/72x72/1f514.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
+                    <img src="https://img.icons8.com/ios-filled/50/C9A24D/bell.png" width="14" height="14" style="display:inline-block; vertical-align:middle; margin-right:4px;" />
                     <span style="vertical-align:middle;">Handpicked</span>
                   </td>
                 </tr>
@@ -296,7 +296,7 @@ export function emailDetails(
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BRAND.line}; border-radius:8px; overflow:hidden; background:${BRAND.bgLight};">${detailsRows}</table>`;
   }
 
-  // If QR code is provided, render the two-column layout
+  // Use the exact QR data URL passed from the template
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrData)}`;
 
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BRAND.line}; border-radius:8px; overflow:hidden; background:${BRAND.bgLight};">

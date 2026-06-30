@@ -142,15 +142,13 @@ export function emailLayout(opts: {
             </td>
           </tr>
 
-          <!-- 2. Hero Section (Dynamic Two Column) -->
+          <!-- 2. Hero Section (Unified Two-Column Row) -->
           <tr>
-            <td bgcolor="${BRAND.greenDark}" style="background:${BRAND.greenDark};">
-              <!--[if mso]>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td width="360" valign="middle">
-              <![endif]-->
-              <table role="presentation" align="left" class="bn-col" width="360" cellpadding="0" cellspacing="0" style="width:360px;">
+            <td bgcolor="${BRAND.greenDark}" style="background:${BRAND.greenDark}; padding:0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td class="bn-hero-text" style="padding:48px 40px; text-align:left;">
+                  <!-- Left Column: Text -->
+                  <td class="bn-hero-text" width="360" style="width:360px; padding:48px 40px; text-align:left; vertical-align:middle;">
                     ${opts.eyebrow ? `<div style="font-size:10px; font-weight:bold; letter-spacing:2.5px; text-transform:uppercase; color:${BRAND.gold}; margin-bottom:12px;">${opts.eyebrow}</div>` : ""}
                     <h1 style="margin:0; font-family:${SERIF}; font-size:28px; font-weight:normal; line-height:1.2; color:#ffffff;">${opts.heading}</h1>
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px; margin-bottom:16px;">
@@ -158,21 +156,12 @@ export function emailLayout(opts: {
                     </table>
                     <p style="margin:0; font-size:14px; color:#E2E8F0; line-height:1.5;">We can't wait to welcome you.</p>
                   </td>
-                </tr>
-              </table>
-              <!--[if mso]>
-              </td><td width="240" valign="top">
-              <![endif]-->
-              <table role="presentation" align="left" class="bn-col bn-hero-img" width="240" cellpadding="0" cellspacing="0" style="width:240px;">
-                <tr>
-                  <td>
-                    <img src="${heroImage}" width="240" alt="Luxury Room" style="display:block; width:240px; height:240px; object-fit:cover; border:none;" />
+                  <!-- Right Column: Image -->
+                  <td class="bn-hero-img" width="240" style="width:240px; vertical-align:top;">
+                    <img src="${heroImage}" width="240" height="240" alt="Luxury Room" style="display:block; width:240px; height:240px; object-fit:cover; border:none;" />
                   </td>
                 </tr>
               </table>
-              <!--[if mso]>
-              </td></tr></table>
-              <![endif]-->
             </td>
           </tr>
 

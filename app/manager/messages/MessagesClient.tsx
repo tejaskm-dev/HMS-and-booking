@@ -239,6 +239,15 @@ export default function MessagesClient({
     }
   }, [activeConversation]);
 
+  // Lock body scroll on mount to prevent page-level scrolling/viewport shifting
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Resolve / Reopen
   const handleToggleResolve = async () => {
     if (!activeConversation) return;
@@ -384,7 +393,7 @@ export default function MessagesClient({
   }, [activeConversation]);
 
   return (
-    <div className="w-full h-[calc(100vh-7.1rem)] md:h-[calc(100vh-3.5rem)] flex overflow-hidden bg-[#F9F9FB] relative font-sans text-slate-800">
+    <div className="w-full h-[calc(100dvh-7.1rem)] md:h-[calc(100dvh-3.5rem)] flex overflow-hidden bg-[#F9F9FB] relative font-sans text-slate-800">
       
       {/* COLUMN 1: Filters Sidebar (Desktop) */}
       <div

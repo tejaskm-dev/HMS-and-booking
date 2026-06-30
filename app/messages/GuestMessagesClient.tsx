@@ -78,6 +78,15 @@ export default function GuestMessagesClient({
     return conversations.find((c) => c.id === activeConversationId) || null;
   }, [conversations, activeConversationId]);
 
+  // Lock body scroll on mount to prevent page-level scrolling/viewport shifting
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // React 19 Render-phase state sync for booking reset to avoid cascading renders
   const [prevHotelId, setPrevHotelId] = useState<string | null>(null);
   if (activeConversation?.hotel_id !== prevHotelId) {
@@ -279,7 +288,7 @@ export default function GuestMessagesClient({
   };
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] bg-[#FDFDFB] flex flex-col font-sans text-slate-800 antialiased overflow-hidden">
+    <div className="w-full h-[calc(100dvh-4rem)] bg-[#FDFDFB] flex flex-col font-sans text-slate-800 antialiased overflow-hidden">
       
       {/* 1. Global Page Header */}
       <header className="bg-white border-b border-slate-200/85 px-4 py-3 sm:px-6 md:py-4 flex items-center justify-between shadow-3xs shrink-0">

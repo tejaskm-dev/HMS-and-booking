@@ -66,10 +66,11 @@ export const BRAND = {
 const SERIF = "Georgia,'Times New Roman',Times,serif";
 const SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif";
 
-// Unsplash high-end imagery
+// Supabase public storage hosted images
 const IMAGES = {
-  heroRoom: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80",
-  lobbyPromo: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+  logoMark: "https://ekurxcwuriltcrsrcfqo.supabase.co/storage/v1/object/public/public_assets/logo-mark.png",
+  heroRoom: "https://ekurxcwuriltcrsrcfqo.supabase.co/storage/v1/object/public/public_assets/hero-room.jpg",
+  lobbyPromo: "https://ekurxcwuriltcrsrcfqo.supabase.co/storage/v1/object/public/public_assets/lobby.jpg",
 };
 
 // Reusable Gold Divider
@@ -92,8 +93,6 @@ export function emailLayout(opts: {
   imageUrl?: string;
 }): string {
   const heroImage = opts.imageUrl ?? IMAGES.heroRoom;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hms-and-booking.vercel.app";
-  const logoUrl = `${siteUrl}/logo-mark.png`;
 
   return `<!doctype html>
 <html lang="en">
@@ -128,7 +127,7 @@ export function emailLayout(opts: {
                 <tr>
                   <!-- Logo Icon -->
                   <td width="48" style="vertical-align:middle;">
-                    <img src="${logoUrl}" width="40" height="40" alt="BookNest" style="display:block; width:40px; height:40px; border:none; outline:none; text-decoration:none;" />
+                    <img src="${IMAGES.logoMark}" width="40" height="40" alt="BookNest" style="display:block; width:40px; height:40px; border:none; outline:none; text-decoration:none;" />
                   </td>
                   <!-- Logo Text -->
                   <td style="padding-left:12px; vertical-align:middle;">

@@ -490,10 +490,12 @@ export default function MessagesClient({
         </div>
       </div>
 
-      {/* COLUMN 2: Conversation List (Desktop) */}
+      {/* COLUMN 2: Conversation List (Desktop) / Mobile Slide-over */}
       <div
-        className={`w-full md:w-80 shrink-0 h-full border-r border-slate-200 bg-white flex flex-col transition-all duration-300 overflow-hidden ${
-          activeId ? "hidden md:flex" : "flex"
+        className={`shrink-0 h-full border-r border-slate-200 bg-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden md:static md:translate-x-0 md:opacity-100 md:pointer-events-auto ${
+          activeId 
+            ? "absolute translate-x-[-20%] opacity-0 pointer-events-none w-full h-full" 
+            : "absolute translate-x-0 opacity-100 pointer-events-auto inset-0 w-full h-full"
         } ${isListExpanded ? "md:w-80" : "md:w-0 md:border-r-0"}`}
       >
         {/* Header */}
@@ -615,8 +617,10 @@ export default function MessagesClient({
 
       {/* COLUMN 3: Chat View (Main Area) */}
       <div
-        className={`flex-1 flex flex-col h-full bg-white transition-all duration-300 relative ${
-          activeId ? "flex" : "hidden md:flex"
+        className={`flex-1 flex flex-col h-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] relative md:static md:translate-x-0 md:opacity-100 md:pointer-events-auto ${
+          activeId 
+            ? "absolute translate-x-0 opacity-100 pointer-events-auto inset-0 w-full h-full" 
+            : "absolute translate-x-full opacity-0 pointer-events-none"
         }`}
       >
         {activeConversation ? (
@@ -830,7 +834,7 @@ export default function MessagesClient({
               ? "translate-x-0 w-full md:w-80 border-l border-slate-200"
               : "translate-x-full w-0 md:w-0 md:border-l-0"
           }
-          transition-all duration-300 ease-in-out
+          transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
           fixed md:static inset-y-0 right-0 z-50
           flex flex-col h-full shrink-0 overflow-y-auto p-4 space-y-4 text-left custom-scrollbar bg-[#F9F9FB]
         `}

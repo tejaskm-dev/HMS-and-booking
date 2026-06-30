@@ -340,8 +340,10 @@ export default function GuestMessagesClient({
           
           {/* COLUMN 1: Conversation List */}
           <div
-            className={`w-full md:w-85 shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs ${
-              activeId ? "hidden md:flex" : "flex"
+            className={`w-full md:w-85 shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:static md:translate-x-0 md:opacity-100 md:pointer-events-auto ${
+              activeId 
+                ? "absolute translate-x-[-20%] opacity-0 pointer-events-none" 
+                : "absolute translate-x-0 opacity-100 pointer-events-auto inset-0 w-full h-full"
             }`}
           >
             {/* Search and Filters */}
@@ -458,8 +460,10 @@ export default function GuestMessagesClient({
 
           {/* COLUMN 2: Message Thread */}
           <div
-            className={`flex-1 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs ${
-              activeId ? "flex" : "hidden md:flex"
+            className={`flex-1 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:static md:translate-x-0 md:opacity-100 md:pointer-events-auto ${
+              activeId 
+                ? "absolute translate-x-0 opacity-100 pointer-events-auto inset-0 w-full h-full" 
+                : "absolute translate-x-full opacity-0 pointer-events-none"
             }`}
           >
             {activeConversation ? (
@@ -630,10 +634,10 @@ export default function GuestMessagesClient({
           {/* COLUMN 3: Details Panel (Desktop side panel or Mobile Drawer) */}
           {activeConversation && (
             <div
-              className={`shrink-0 h-full bg-white border border-slate-200/80 rounded-2xl overflow-y-auto custom-scrollbar shadow-2xs transition-all duration-300 ${
+              className={`shrink-0 h-full bg-white border border-slate-200/80 rounded-2xl overflow-y-auto custom-scrollbar shadow-2xs transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 isDetailsExpanded 
-                  ? "w-full md:w-80 block absolute md:static inset-0 z-40 md:z-auto" 
-                  : "w-0 hidden"
+                  ? "w-full md:w-80 translate-x-0 absolute md:static inset-0 z-40 md:z-auto opacity-100 pointer-events-auto" 
+                  : "w-0 opacity-0 pointer-events-none translate-x-full absolute md:static inset-y-0 right-0 z-40"
               }`}
             >
               {/* Drawer Mobile Close Header */}

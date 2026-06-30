@@ -23,7 +23,7 @@ import { setResolved } from "@/app/messages/actions";
 import { useConversationMessages } from "@/components/messaging/useConversationMessages";
 import ChatThread from "@/components/messaging/ChatThread";
 import Composer from "@/components/messaging/Composer";
-import type { Conversation, Booking } from "@/lib/types";
+import type { Conversation, Booking, Message } from "@/lib/types";
 
 interface MessagesClientProps {
   initialConversations: Conversation[];
@@ -39,6 +39,9 @@ interface MessagesClientProps {
 
 const supabase = createClient();
 
+// Static empty array to prevent reference recreation and infinite loops
+const EMPTY_MESSAGES: Message[] = [];
+
 export default function MessagesClient({
   initialConversations,
   hotels,
@@ -49,8 +52,8 @@ export default function MessagesClient({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  // Mobile navigation state
-  const [showRightPanel, setShowRightPanel] = useState(false);
+  // Mobile/Desktop sidebar toggle
+  const [showRightPanel, setShowRightPanel] = useState(true);
 
   // Filters & Search
   const [filterTab, setFilterTab] = useState<"all" | "unread" | "resolved">("all");
@@ -66,7 +69,7 @@ export default function MessagesClient({
     return conversations.find((c) => c.id === activeId) || null;
   }, [conversations, activeId]);
 
-  // Use the new custom hook for messages, subscription, and optimistic sending
+  // Use the custom hook for messages, subscription, and optimistic sending
   const {
     messages,
     loading: loadingMessages,
@@ -75,11 +78,10 @@ export default function MessagesClient({
     sendTypingStatus,
   } = useConversationMessages({
     conversationId: activeId,
-    initialMessages: [], // Loaded on demand for manager
+    initialMessages: EMPTY_MESSAGES, // Static reference avoids infinite loop
     currentUserId,
     currentUserRole,
     onMarkRead: () => {
-      // Mark read locally instantly in the conversation list
       setConversations((prev) =>
         prev.map((c) => (c.id === activeId ? { ...c, host_unread: 0 } : c))
       );
@@ -142,7 +144,6 @@ export default function MessagesClient({
                   new Date(a.last_message_at).getTime()
               );
             } else {
-              // New conversation started. Refetch list since payload lacks joins
               fetchConversations();
               return prev;
             }
@@ -226,7 +227,7 @@ export default function MessagesClient({
     });
   };
 
-  // Quick Action Inserters (flow through the same optimistic send path)
+  // Quick Action Inserters
   const sendQuickReply = async (replyText: string) => {
     if (!activeId) return;
     await sendMessage(replyText, []);
@@ -251,11 +252,9 @@ export default function MessagesClient({
   // Filtered Conversations List
   const filteredConversations = useMemo(() => {
     return conversations.filter((c) => {
-      // Hotel filter
       if (selectedHotelId !== "all" && c.hotel_id !== selectedHotelId) {
         return false;
       }
-      // Status tab filter
       if (filterTab === "unread" && c.host_unread === 0) {
         return false;
       }
@@ -266,7 +265,6 @@ export default function MessagesClient({
         return false;
       }
 
-      // Search Query filter
       if (searchQuery.trim() !== "") {
         const query = searchQuery.toLowerCase();
         const guestName = c.profiles?.full_name?.toLowerCase() || "";
@@ -278,7 +276,6 @@ export default function MessagesClient({
     });
   }, [conversations, filterTab, selectedHotelId, searchQuery]);
 
-  // Mask email helper for graceful fallback
   const maskEmail = (email: string) => {
     if (!email || email.includes("No email")) return "";
     const [local, domain] = email.split("@");
@@ -287,13 +284,11 @@ export default function MessagesClient({
     return `${local[0]}${"*".repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
   };
 
-  // Resolve display name
   const getDisplayName = (c: Conversation) => {
     if (c.profiles?.full_name) return c.profiles.full_name;
     return `Guest (${c.guest_id.slice(0, 4)})`;
   };
 
-  // Guest initials for selected avatar
   const activeInitials = useMemo(() => {
     if (!activeConversation) return "G";
     const name = getDisplayName(activeConversation);
@@ -305,7 +300,6 @@ export default function MessagesClient({
       .toUpperCase();
   }, [activeConversation]);
 
-  // Format date helper for list rows
   const formatLastMessageTime = (isoString: string) => {
     const date = new Date(isoString);
     const today = new Date();
@@ -328,23 +322,19 @@ export default function MessagesClient({
   };
 
   return (
-    <div className="mx-auto w-full h-[calc(100vh-3.5rem)] md:h-[calc(100vh-2rem)] max-w-7xl px-2 sm:px-4 py-4 md:py-6 flex gap-4 overflow-hidden">
-      {/* 3-Column workspace layout */}
-
-      {/* COLUMN 1: Conversation List (Hidden on mobile when thread is active) */}
+    <div className="mx-auto w-full h-[calc(100vh-3.5rem)] md:h-[calc(100vh-2rem)] max-w-7xl px-2 sm:px-4 py-4 md:py-6 flex gap-5 overflow-hidden bg-[#FDFDFB]">
+      {/* COLUMN 1: Conversation List */}
       <div
-        className={`w-full md:w-80 shrink-0 flex flex-col h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition-all duration-300 ${
+        className={`w-full md:w-80 shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs transition-all duration-300 ${
           activeId ? "hidden md:flex" : "flex"
         }`}
       >
-        {/* Header filters */}
-        <div className="p-4 border-b border-slate-150 space-y-3 bg-slate-50/50">
+        <div className="p-4 border-b border-slate-150 space-y-3.5 bg-[#F9F6F0]/30">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-black text-slate-900 font-serif tracking-tight flex items-center gap-1.5">
-              <MessageSquare className="h-5 w-5 text-brand-700" /> Inbox
+            <h1 className="text-lg font-black text-slate-900 font-serif tracking-tight flex items-center gap-2">
+              <MessageSquare className="h-4.5 w-4.5 text-brand-700" /> Inbox
             </h1>
 
-            {/* Hotel filter */}
             {hotels.length > 1 && (
               <div className="flex items-center gap-1">
                 <Filter className="h-3.5 w-3.5 text-slate-400" />
@@ -372,12 +362,12 @@ export default function MessagesClient({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search guests or messages..."
-              className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-slate-350 transition shadow-2xs"
+              className="w-full rounded-xl border border-slate-200/80 bg-white pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-slate-300 focus:shadow-xs transition duration-200"
             />
           </div>
 
           {/* Inbox tabs */}
-          <div className="flex rounded-lg bg-slate-150/60 p-0.5">
+          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/45">
             {[
               { id: "all", label: "Open" },
               { id: "unread", label: "Unread" },
@@ -386,10 +376,10 @@ export default function MessagesClient({
               <button
                 key={tab.id}
                 onClick={() => setFilterTab(tab.id as "all" | "unread" | "resolved")}
-                className={`flex-1 rounded-md py-1.5 text-center text-xs font-bold transition-all duration-200 cursor-pointer ${
+                className={`flex-1 rounded-md py-1.5 text-center text-xs font-black transition-all duration-200 cursor-pointer ${
                   filterTab === tab.id
-                    ? "bg-white text-brand-700 shadow-xs"
-                    : "text-slate-550 hover:text-slate-850"
+                    ? "bg-white text-brand-705 shadow-xs border border-slate-200/20"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 {tab.label}
@@ -399,9 +389,9 @@ export default function MessagesClient({
         </div>
 
         {/* Scrollable list */}
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-[#FDFDFB]">
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-[#FDFDFB]/30 custom-scrollbar">
           {filteredConversations.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
+            <div className="p-10 text-center text-slate-400">
               <p className="text-xs font-bold font-serif">No conversations found</p>
               <p className="text-[10px] text-slate-400 mt-1">There are no threads matching this filter.</p>
             </div>
@@ -423,31 +413,30 @@ export default function MessagesClient({
                   key={c.id}
                   onClick={() => {
                     setActiveId(c.id);
-                    setShowRightPanel(false);
                   }}
-                  className={`w-full p-4 flex gap-3 text-left hover:bg-slate-50/70 transition duration-200 outline-none border-l-4 ${
+                  className={`w-full p-4.5 flex gap-3.5 text-left hover:bg-[#F9F6F0]/30 transition duration-250 outline-none border-l-4 relative ${
                     isActive
-                      ? "bg-brand-50/40 border-brand-600 pl-3"
+                      ? "bg-[#F9F6F0]/65 border-brand-700 pl-3.5"
                       : "border-transparent"
                   }`}
                 >
                   {/* Guest avatar */}
-                  <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center font-bold text-slate-700 text-xs shadow-inner uppercase">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-white border border-gold-200/40 flex items-center justify-center font-bold text-slate-700 text-xs shadow-xs uppercase">
                     {initials}
                   </div>
 
                   {/* Body preview */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-1.5">
-                      <span className={`block text-xs font-bold text-slate-900 truncate`}>
+                      <span className="block text-xs font-bold text-slate-900 truncate">
                         {displayName}
                       </span>
-                      <span className="text-[10px] font-medium text-slate-400 shrink-0">
+                      <span className="text-[9px] font-bold text-slate-400 shrink-0 uppercase tracking-wider">
                         {formatLastMessageTime(c.last_message_at)}
                       </span>
                     </div>
 
-                    <span className="block text-[9px] font-bold text-brand-650 tracking-wider uppercase mt-0.5">
+                    <span className="block text-[9px] font-bold text-gold-650 tracking-widest uppercase mt-0.5">
                       {c.hotels?.name || "Hotel"}
                     </span>
 
@@ -473,31 +462,31 @@ export default function MessagesClient({
         </div>
       </div>
 
-      {/* COLUMN 2: Message Thread (Hidden on mobile when list is active) */}
+      {/* COLUMN 2: Message Thread */}
       <div
-        className={`flex-1 flex flex-col h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs relative transition-all duration-300 ${
+        className={`flex-1 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs relative transition-all duration-300 ${
           activeId ? "flex" : "hidden md:flex"
         }`}
       >
         {activeConversation ? (
           <>
             {/* Header info */}
-            <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-slate-150 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
+            <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-slate-200 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-3.5">
                 {/* Mobile Back Button */}
                 <button
                   type="button"
                   onClick={() => setActiveId(null)}
-                  className="md:hidden p-1.5 rounded-xl hover:bg-slate-200/60 text-slate-600 transition-colors cursor-pointer"
+                  className="md:hidden p-1.5 rounded-xl hover:bg-slate-100 text-slate-650 transition cursor-pointer"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
 
-                <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-brand-600 to-brand-700 flex items-center justify-center font-bold text-white text-xs shadow-md uppercase">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-brand-700 to-brand-850 flex items-center justify-center font-bold text-white text-xs shadow-md uppercase tracking-wider border border-brand-900">
                   {activeInitials}
                 </div>
                 <div className="text-left">
-                  <h2 className="text-sm font-bold text-slate-900 leading-tight">
+                  <h2 className="text-sm font-bold text-slate-900 font-serif tracking-tight leading-tight">
                     {getDisplayName(activeConversation)}
                   </h2>
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -505,17 +494,17 @@ export default function MessagesClient({
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
                     </span>
-                    <span className="text-[9px] font-bold text-slate-450 uppercase tracking-widest">
-                      Active
+                    <span className="text-[9px] font-black text-slate-450 uppercase tracking-widest">
+                      Active Concierge
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Action and Details buttons */}
-              <div className="flex items-center gap-1">
+              {/* Action buttons */}
+              <div className="flex items-center gap-1.5">
                 {activeConversation.status === "resolved" && (
-                  <span className="rounded-full bg-slate-155 border border-slate-250 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-slate-550">
+                  <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-550">
                     Resolved
                   </span>
                 )}
@@ -523,10 +512,12 @@ export default function MessagesClient({
                 <button
                   type="button"
                   onClick={() => setShowRightPanel(!showRightPanel)}
-                  className={`p-1.5 rounded-xl hover:bg-slate-200/65 text-slate-600 transition-colors cursor-pointer ${
-                    showRightPanel ? "bg-slate-150" : ""
+                  className={`p-2 rounded-xl hover:bg-slate-50 border transition cursor-pointer ${
+                    showRightPanel
+                      ? "bg-brand-50/50 border-brand-200/50 text-brand-700"
+                      : "bg-white border-slate-200 text-slate-500"
                   }`}
-                  title="Guest Information"
+                  title="Toggle Guest Folio"
                 >
                   <Info className="h-4.5 w-4.5" />
                 </button>
@@ -535,8 +526,11 @@ export default function MessagesClient({
 
             {/* Message window */}
             {loadingMessages ? (
-              <div className="flex-1 flex items-center justify-center bg-[#F8F7F4]">
-                <Clock className="h-6 w-6 animate-spin text-brand-600" />
+              <div className="flex-1 flex items-center justify-center bg-[#F9F6F0]">
+                <div className="flex flex-col items-center gap-2">
+                  <Clock className="h-6 w-6 animate-spin text-brand-600" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Retrieving History</span>
+                </div>
               </div>
             ) : (
               <ChatThread
@@ -556,63 +550,43 @@ export default function MessagesClient({
             />
           </>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center text-center p-8 bg-[#F8F7F4]">
-            <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center shadow-md border border-slate-150 mb-4">
-              <MessageSquare className="h-8 w-8 text-brand-600" />
+          <div className="flex h-full flex-col items-center justify-center text-center p-8 bg-[#F9F6F0]">
+            <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-sm border border-gold-100/40 mb-5">
+              <MessageSquare className="h-8 w-8 text-brand-700" />
             </div>
-            <p className="text-base font-bold text-slate-700 font-serif">Select a conversation</p>
-            <p className="text-xs text-slate-450 mt-1 max-w-sm">
-              Choose a guest thread from the sidebar to view their profile, booking details, and begin chatting.
+            <h3 className="text-lg font-bold text-slate-800 font-serif tracking-tight">Concierge Desk</h3>
+            <p className="text-xs text-slate-450 mt-1.5 max-w-xs leading-relaxed">
+              Select an active conversation from the inbox to manage guest requests, view booking details, and message.
             </p>
           </div>
         )}
       </div>
 
-      {/* COLUMN 3: Context Panel (Sidebar on desktop, drawer on mobile) */}
-      {activeId && activeConversation && (
-        <div
-          className={`shrink-0 flex flex-col h-full gap-4 transition-all duration-300 overflow-y-auto ${
-            showRightPanel
-              ? "w-full md:w-80 flex absolute md:relative inset-0 md:inset-auto bg-[#F8F7F4] md:bg-transparent z-20 md:z-auto p-4 md:p-0"
-              : "hidden"
-          }`}
-        >
-          {/* Mobile Close Header */}
-          <div className="md:hidden flex items-center justify-between mb-2">
-            <h3 className="text-sm font-black uppercase text-slate-450 tracking-wider">
-              Conversation Details
-            </h3>
-            <button
-              type="button"
-              onClick={() => setShowRightPanel(false)}
-              className="p-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 cursor-pointer"
-            >
-              <ArrowLeft className="h-4 w-4 inline mr-1" /> Back to Chat
-            </button>
-          </div>
-
-          {/* Guest Information */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs text-left">
-            <h3 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5">
-              <User className="h-4 w-4 text-brand-600" /> Guest Profile
+      {/* COLUMN 3: Context Panel */}
+      {activeId && activeConversation && showRightPanel && (
+        <div className="w-full md:w-80 shrink-0 flex flex-col h-full gap-4 overflow-y-auto animate-fade-in z-20 md:z-auto">
+          {/* Guest Profile Card */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs text-left">
+            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <User className="h-3.5 w-3.5 text-brand-700" /> Guest Folio
             </h3>
             
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-sm shadow-inner uppercase">
+                <div className="h-12 w-12 rounded-full bg-[#F9F6F0] border border-gold-200/40 flex items-center justify-center font-bold text-slate-700 text-sm shadow-xs uppercase">
                   {activeInitials}
                 </div>
                 <div className="text-left">
                   <h4 className="text-sm font-bold text-slate-900 leading-tight">
                     {getDisplayName(activeConversation)}
                   </h4>
-                  <p className="text-[10px] text-slate-450 font-bold tracking-wider uppercase mt-0.5">
-                    ID: {activeConversation.guest_id.slice(0, 8)}...
+                  <p className="text-[9px] text-gold-650 font-bold tracking-wider uppercase mt-1">
+                    ID: {activeConversation.guest_id.slice(0, 8)}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2 border-t border-slate-100 pt-3 text-xs">
+              <div className="space-y-2.5 text-xs">
                 <div className="flex items-center gap-2.5 text-slate-650">
                   <Mail className="h-4 w-4 text-slate-400 shrink-0" />
                   <span className="truncate">
@@ -629,11 +603,11 @@ export default function MessagesClient({
             </div>
           </div>
 
-          {/* Booking Summary */}
+          {/* Booking Summary Card */}
           {activeConversation.booking_id && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs text-left">
-              <h3 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-brand-600" /> Linked Booking
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs text-left">
+              <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                <Calendar className="h-3.5 w-3.5 text-brand-700" /> Stay Details
               </h3>
               
               {loadingBooking ? (
@@ -641,19 +615,19 @@ export default function MessagesClient({
                   <Clock className="h-4 w-4 animate-spin text-brand-600" />
                 </div>
               ) : bookingDetails ? (
-                <div className="space-y-3.5 text-xs text-left">
+                <div className="space-y-4 text-xs text-left">
                   <div className="flex justify-between items-baseline">
                     <div>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Confirmation</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Folio Code</span>
                       <p className="font-bold text-slate-800 mt-0.5">
                         {bookingDetails.id.split("-")[0].toUpperCase()}
                       </p>
                     </div>
                     
-                    <span className={`font-black uppercase tracking-wider text-[8px] px-2 py-0.5 rounded-full ${
+                    <span className={`font-black uppercase tracking-wider text-[8px] px-2.5 py-1 rounded-full ${
                       bookingDetails.status === "confirmed" || bookingDetails.status === "checked_in"
-                        ? "bg-green-50 text-green-700 border border-green-200"
-                        : "bg-slate-50 text-slate-500 border border-slate-200"
+                        ? "bg-green-50 text-green-700 border border-green-200/60"
+                        : "bg-slate-50 text-slate-500 border border-slate-200/60"
                     }`}>
                       {bookingDetails.status}
                     </span>
@@ -661,7 +635,7 @@ export default function MessagesClient({
                   
                   <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
                     <div>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Check-In</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Arrival</span>
                       <p className="font-bold text-slate-800 mt-0.5">
                         {new Date(bookingDetails.check_in).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -670,7 +644,7 @@ export default function MessagesClient({
                       </p>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Check-Out</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Departure</span>
                       <p className="font-bold text-slate-800 mt-0.5">
                         {new Date(bookingDetails.check_out).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -680,20 +654,20 @@ export default function MessagesClient({
                     </div>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                  <div className="border-t border-slate-100 pt-3 space-y-2.5">
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Room</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-slate-500 font-medium">Reserved Room</span>
+                      <span className="font-bold text-slate-850">
                         {bookingDetails.rooms?.name || "Standard Room"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Nights</span>
-                      <span className="font-bold text-slate-800">{bookingDetails.nights} Night(s)</span>
+                      <span className="text-slate-500 font-medium">Duration</span>
+                      <span className="font-bold text-slate-850">{bookingDetails.nights} Night(s)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Guests</span>
-                      <span className="font-bold text-slate-800">{bookingDetails.guest_count} Guest(s)</span>
+                      <span className="text-slate-500 font-medium">Parties</span>
+                      <span className="font-bold text-slate-855">{bookingDetails.guest_count} Guest(s)</span>
                     </div>
                   </div>
                 </div>
@@ -703,19 +677,18 @@ export default function MessagesClient({
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs text-left">
-            <h3 className="text-xs font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5">
-              <CheckSquare className="h-4 w-4 text-brand-600" /> Actions
+          {/* Quick Actions Card */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs text-left">
+            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <CheckSquare className="h-3.5 w-3.5 text-brand-700" /> Concierge Services
             </h3>
             
             <div className="space-y-2 text-left">
-              {/* Mark resolved */}
               <button
                 type="button"
                 onClick={handleToggleResolve}
                 disabled={pending}
-                className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition duration-200 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-750 hover:bg-[#F9F6F0]/50 hover:border-slate-300 transition duration-200 disabled:opacity-50 cursor-pointer shadow-2xs"
               >
                 <span>{activeConversation.status === "resolved" ? "Re-open Conversation" : "Mark as Resolved"}</span>
                 <CheckCircle className={`h-4.5 w-4.5 ${
@@ -725,18 +698,18 @@ export default function MessagesClient({
 
               {activeConversation.status !== "resolved" && (
                 <>
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pt-2 px-1">
-                    Quick Replies
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest pt-3 px-1">
+                    Instant Replies
                   </div>
                   
                   {/* Share Info */}
                   <button
                     type="button"
                     onClick={handleSharePropertyInfo}
-                    className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition duration-200 text-left cursor-pointer"
+                    className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-750 hover:bg-[#F9F6F0]/50 hover:border-slate-300 transition duration-200 text-left cursor-pointer shadow-2xs"
                   >
                     <span className="flex items-center gap-1.5">
-                      <Building className="h-4 w-4 text-slate-400" /> Property Info
+                      <Building className="h-4 w-4 text-slate-400" /> Property Details
                     </span>
                     <ChevronRight className="h-4 w-4 text-slate-300" />
                   </button>
@@ -745,10 +718,10 @@ export default function MessagesClient({
                   <button
                     type="button"
                     onClick={handleSharePolicies}
-                    className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition duration-200 text-left cursor-pointer"
+                    className="w-full flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-750 hover:bg-[#F9F6F0]/50 hover:border-slate-300 transition duration-200 text-left cursor-pointer shadow-2xs"
                   >
                     <span className="flex items-center gap-1.5">
-                      <FileText className="h-4 w-4 text-slate-400" /> Hotel Policies
+                      <FileText className="h-4 w-4 text-slate-400" /> Hotel Guidelines
                     </span>
                     <ChevronRight className="h-4 w-4 text-slate-300" />
                   </button>

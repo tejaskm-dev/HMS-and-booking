@@ -49,11 +49,10 @@ export default function GuestMessagesClient({
     sendTypingStatus,
   } = useConversationMessages({
     conversationId: activeConversationId,
-    initialMessages, // Seeded directly from server
+    initialMessages, // Seeded directly from server (no cold fetch)
     currentUserId,
     currentUserRole,
     onMarkRead: () => {
-      // Mark read locally instantly in the conversation list
       setConversations((prev) =>
         prev.map((c) =>
           c.id === activeConversationId ? { ...c, guest_unread: 0 } : c
@@ -142,24 +141,24 @@ export default function GuestMessagesClient({
   };
 
   return (
-    <div className="mx-auto w-full h-[calc(100vh-4.5rem)] md:h-[calc(100vh-2rem)] max-w-5xl px-2 sm:px-4 py-4 md:py-6 flex gap-4 overflow-hidden">
+    <div className="mx-auto w-full h-[calc(100vh-4.5rem)] md:h-[calc(100vh-2rem)] max-w-5xl px-2 sm:px-4 py-4 md:py-6 flex gap-4 overflow-hidden bg-[#FDFDFB]">
       {/* COLUMN 1: Conversation List */}
       <div
-        className={`w-full md:w-80 shrink-0 flex flex-col h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs ${
+        className={`w-full md:w-80 shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs ${
           activeConversationId ? "hidden md:flex" : "flex"
         }`}
       >
-        <div className="p-4 border-b border-slate-150 bg-slate-50/50">
-          <h1 className="text-lg font-black text-slate-900 font-serif tracking-tight flex items-center gap-1.5">
-            <MessageSquare className="h-5 w-5 text-brand-700" /> Messages
+        <div className="p-4 border-b border-slate-150 bg-[#F9F6F0]/30">
+          <h1 className="text-lg font-black text-slate-900 font-serif tracking-tight flex items-center gap-2">
+            <MessageSquare className="h-4.5 w-4.5 text-brand-700" /> Messages
           </h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-[#FDFDFB]">
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-[#FDFDFB]/30 custom-scrollbar">
           {conversations.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
+            <div className="p-10 text-center text-slate-455 animate-fade-in">
               <p className="text-sm font-bold font-serif">No messages yet</p>
-              <p className="text-[10px] mt-1">Start a conversation from a hotel details page.</p>
+              <p className="text-[10px] text-slate-400 mt-1">Start a conversation from a hotel details page.</p>
             </div>
           ) : (
             conversations.map((c) => {
@@ -179,12 +178,12 @@ export default function GuestMessagesClient({
                 <button
                   key={c.id}
                   onClick={() => router.push(`/messages?c=${c.id}`)}
-                  className={`w-full p-4 flex gap-3 text-left hover:bg-slate-50/50 transition duration-205 outline-none border-l-4 ${
-                    isActive ? "bg-brand-50/40 border-brand-600 pl-3" : "border-transparent"
+                  className={`w-full p-4.5 flex gap-3.5 text-left hover:bg-[#F9F6F0]/30 transition duration-250 outline-none border-l-4 relative ${
+                    isActive ? "bg-[#F9F6F0]/65 border-brand-700 pl-3.5" : "border-transparent"
                   }`}
                 >
                   {/* Hotel avatar */}
-                  <div className="h-10 w-10 shrink-0 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center font-bold text-slate-700 text-xs shadow-inner uppercase">
+                  <div className="h-10 w-10 shrink-0 rounded-xl bg-white border border-gold-200/40 flex items-center justify-center font-bold text-slate-700 text-xs shadow-xs uppercase">
                     {initials}
                   </div>
 
@@ -194,13 +193,13 @@ export default function GuestMessagesClient({
                       <span className="block text-xs font-bold text-slate-900 truncate">
                         {c.hotels?.name || "Hotel Manager"}
                       </span>
-                      <span className="text-[10px] font-medium text-slate-400 shrink-0">
+                      <span className="text-[9px] font-bold text-slate-400 shrink-0 uppercase tracking-wider">
                         {formatLastMessageTime(c.last_message_at)}
                       </span>
                     </div>
 
                     <p className={`text-xs mt-1 truncate ${
-                      hasUnread ? "font-bold text-slate-900" : "text-slate-500"
+                      hasUnread ? "font-bold text-slate-900" : "text-slate-550"
                     }`}>
                       {c.last_message_preview || "No messages yet"}
                     </p>
@@ -221,29 +220,29 @@ export default function GuestMessagesClient({
 
       {/* COLUMN 2: Message Thread */}
       <div
-        className={`flex-1 flex flex-col h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs ${
+        className={`flex-1 flex flex-col h-full bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs ${
           activeConversationId ? "flex" : "hidden md:flex"
         }`}
       >
         {activeConversation ? (
           <>
             {/* Header info */}
-            <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-slate-150 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
+            <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-slate-200 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-3.5">
                 {/* Mobile Back Button */}
                 <button
                   type="button"
                   onClick={() => router.push("/messages")}
-                  className="md:hidden p-1.5 rounded-xl hover:bg-slate-200/60 text-slate-650 transition-colors cursor-pointer"
+                  className="md:hidden p-1.5 rounded-xl hover:bg-slate-100 text-slate-650 transition cursor-pointer"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
 
-                <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-brand-600 to-brand-700 flex items-center justify-center font-bold text-white text-xs shadow-md uppercase">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-brand-600 to-brand-700 flex items-center justify-center font-bold text-white text-xs shadow-md uppercase tracking-wider border border-brand-900">
                   {hostInitials}
                 </div>
                 <div className="text-left">
-                  <h2 className="text-sm font-bold text-slate-900 leading-tight">
+                  <h2 className="text-sm font-bold text-slate-900 font-serif tracking-tight leading-tight">
                     {activeConversation.hotels?.name || "Hotel Host"}
                   </h2>
                   <p className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
@@ -253,7 +252,7 @@ export default function GuestMessagesClient({
               </div>
 
               {activeConversation.status === "resolved" && (
-                <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-500">
+                <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-slate-500">
                   Resolved
                 </span>
               )}
@@ -261,8 +260,11 @@ export default function GuestMessagesClient({
 
             {/* Message window */}
             {loadingMessages ? (
-              <div className="flex-1 flex items-center justify-center bg-[#F8F7F4]">
-                <Clock className="h-6 w-6 animate-spin text-brand-600" />
+              <div className="flex-1 flex items-center justify-center bg-[#F9F6F0]">
+                <div className="flex flex-col items-center gap-2">
+                  <Clock className="h-6 w-6 animate-spin text-brand-600" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Retrieving Messages</span>
+                </div>
               </div>
             ) : (
               <ChatThread
@@ -282,13 +284,13 @@ export default function GuestMessagesClient({
             />
           </>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center text-center p-8 bg-[#F8F7F4]">
-            <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center shadow-md border border-slate-150 mb-4">
-              <MessageSquare className="h-8 w-8 text-brand-600" />
+          <div className="flex h-full flex-col items-center justify-center text-center p-8 bg-[#F9F6F0]">
+            <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-sm border border-gold-100/40 mb-5">
+              <MessageSquare className="h-8 w-8 text-brand-700" />
             </div>
-            <p className="text-base font-bold text-slate-700 font-serif">Select a message thread</p>
-            <p className="text-xs text-slate-450 mt-1 max-w-sm">
-              Choose a conversation from the sidebar to view your messages and chat with the hotel staff.
+            <h3 className="text-lg font-bold text-slate-800 font-serif tracking-tight">Your Inbox</h3>
+            <p className="text-xs text-slate-450 mt-1.5 max-w-xs leading-relaxed">
+              Select a message thread from the sidebar to chat with the hotel host and view your stay arrangements.
             </p>
           </div>
         )}

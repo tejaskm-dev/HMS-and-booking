@@ -30,6 +30,12 @@ export function useConversationMessages({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeConversationIdRef = useRef<string | null>(conversationId);
   const onMarkReadRef = useRef<(() => void) | undefined>(onMarkRead);
+  const initialMessagesRef = useRef<Message[]>(initialMessages);
+
+  // Keep initialMessagesRef updated
+  useEffect(() => {
+    initialMessagesRef.current = initialMessages;
+  }, [initialMessages]);
 
   // React 19 State sync during render phase (prevents cascading renders)
   if (conversationId !== prevConversationId) {
@@ -67,9 +73,10 @@ export function useConversationMessages({
   useEffect(() => {
     if (!conversationId) return;
     const refinedId: string = conversationId;
+    const currentInitials = initialMessagesRef.current;
 
     // If already seeded by initialMessages, just mark read and skip fetch
-    if (initialMessages.length > 0 && initialMessages[0].conversation_id === refinedId) {
+    if (currentInitials.length > 0 && currentInitials[0].conversation_id === refinedId) {
       triggerMarkRead(refinedId);
       return;
     }
@@ -102,7 +109,7 @@ export function useConversationMessages({
     return () => {
       active = false;
     };
-  }, [conversationId, initialMessages, triggerMarkRead]);
+  }, [conversationId, triggerMarkRead]);
 
   // 2. Realtime subscription (Postgres Changes + Broadcast Typing)
   useEffect(() => {

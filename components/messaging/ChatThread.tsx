@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, UIEvent } from "react";
 import type { Message } from "@/lib/types";
-import { Clock, Check, CheckCheck, ChevronDown, X } from "lucide-react";
+import { Clock, Check, CheckCheck, ChevronDown, X, ZoomIn } from "lucide-react";
 
 interface ChatThreadProps {
   messages: Message[];
@@ -139,33 +139,36 @@ export default function ChatThread({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#F8F7F4] relative">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#F9F6F0] relative overflow-hidden">
+      {/* Luxury Background Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#C9A24D_1px,transparent_1px)] [background-size:16px_16px]" />
+
       {/* Scrollable Message Container */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6 custom-scrollbar"
+        className="flex-1 overflow-y-auto px-4 sm:px-8 py-8 space-y-8 custom-scrollbar relative z-10"
       >
         {messageGroups.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center p-6">
-            <div className="h-12 w-12 rounded-full bg-brand-50 flex items-center justify-center mb-3">
-              <Clock className="h-6 w-6 text-brand-600" />
+          <div className="flex h-full flex-col items-center justify-center text-center p-6 animate-fade-in">
+            <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm border border-gold-100/60">
+              <Clock className="h-6 w-6 text-gold-600 animate-pulse" />
             </div>
-            <p className="text-sm font-bold text-slate-700 font-serif">No messages yet</p>
-            <p className="text-xs text-slate-455 mt-1">Send a message to start the conversation.</p>
+            <h3 className="text-base font-bold text-slate-800 font-serif tracking-tight">No messages yet</h3>
+            <p className="text-xs text-slate-500 mt-1.5 max-w-xs">Your premium conversation with the concierge begins here.</p>
           </div>
         ) : (
           messageGroups.map((group) => (
             <div key={group.day} className="space-y-4">
               {/* Day Separator */}
               <div className="flex justify-center">
-                <span className="rounded-full bg-slate-200/60 px-3 py-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest shadow-xs">
+                <span className="rounded-full bg-white/80 border border-gold-100/50 backdrop-blur-xs px-4 py-1.5 text-[10px] font-bold text-gold-700 uppercase tracking-widest shadow-2xs">
                   {group.day}
                 </span>
               </div>
 
               {/* Messages List */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {group.messages.map((msg, index) => {
                   const isOwn = msg.sender_role === currentUserRole;
                   const isSending = msg.sending;
@@ -181,15 +184,15 @@ export default function ChatThread({
                   return (
                     <div
                       key={msg.id}
-                      className={`flex items-end gap-2.5 ${
+                      className={`flex items-end gap-3.5 ${
                         isOwn ? "justify-end" : "justify-start"
-                      } ${isConsecutive ? "mt-1" : "mt-4"}`}
+                      } ${isConsecutive ? "mt-0.5" : "mt-6"} group/msg animate-fade-in-up`}
                     >
                       {/* Avatar column (only show for other sender if not consecutive) */}
                       {!isOwn && (
                         <div className="w-8 shrink-0 flex justify-center">
                           {!isConsecutive ? (
-                            <div className="flex h-8 w-8 select-none items-center justify-center rounded-full bg-brand-50 text-[10px] font-black text-brand-800 border border-brand-200/60 shadow-sm uppercase">
+                            <div className="flex h-8 w-8 select-none items-center justify-center rounded-full bg-white text-[10px] font-black text-brand-800 border border-gold-200/50 shadow-sm uppercase tracking-wider">
                               {otherPartyInitials}
                             </div>
                           ) : (
@@ -200,39 +203,44 @@ export default function ChatThread({
 
                       {/* Bubble Body */}
                       <div
-                        className={`max-w-[70%] sm:max-w-[60%] flex flex-col gap-1.5 p-3 sm:p-3.5 shadow-xs border ${
+                        className={`max-w-[75%] sm:max-w-[65%] flex flex-col gap-1.5 p-3.5 sm:p-4 shadow-sm transition-all duration-300 ${
                           isOwn
-                            ? "bg-brand-700 border-brand-850 text-white rounded-2xl rounded-br-xs"
-                            : "bg-white border-slate-200 text-slate-800 rounded-2xl rounded-bl-xs"
-                        } ${isSending ? "opacity-70 animate-pulse" : ""} ${
+                            ? "bg-gradient-to-br from-brand-700 to-brand-850 border border-brand-900 text-white rounded-3xl rounded-br-xs hover:shadow-md"
+                            : "bg-white border border-slate-200/60 text-slate-800 rounded-3xl rounded-bl-xs hover:shadow-md"
+                        } ${isSending ? "opacity-75 animate-pulse" : ""} ${
                           isConsecutive && isOwn
-                            ? "rounded-br-2xl"
+                            ? "rounded-br-3xl"
                             : isConsecutive && !isOwn
-                            ? "rounded-bl-2xl"
+                            ? "rounded-bl-3xl"
                             : ""
                         }`}
                       >
                         {/* Attachments */}
                         {msg.attachments && msg.attachments.length > 0 && (
-                          <div className="grid grid-cols-1 gap-2">
+                          <div className="grid grid-cols-1 gap-2.5">
                             {msg.attachments.map((att, idx) => {
                               const displayUrl = getAttachmentUrl(att.url);
                               return (
                                 <div
                                   key={idx}
                                   onClick={() => setLightboxImage(displayUrl)}
-                                  className="cursor-zoom-in overflow-hidden rounded-xl border border-black/10 hover:opacity-95 active:scale-99 transition aspect-auto"
+                                  className="relative cursor-zoom-in overflow-hidden rounded-2xl border border-black/10 hover:opacity-95 active:scale-[0.98] transition aspect-auto group/img shadow-2xs"
                                 >
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={displayUrl}
                                     alt="Attachment"
-                                    className="max-h-64 w-full object-cover rounded-xl"
+                                    className="max-h-72 w-full object-cover rounded-2xl"
                                     style={{
                                       width: att.width ? `${att.width}px` : "auto",
                                       height: att.height ? `${att.height}px` : "auto",
                                     }}
                                   />
+                                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="p-2.5 rounded-full bg-white/20 backdrop-blur-md text-white">
+                                      <ZoomIn className="h-4.5 w-4.5" />
+                                    </div>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -241,15 +249,15 @@ export default function ChatThread({
 
                         {/* Text */}
                         {msg.body && (
-                          <p className="text-sm font-medium leading-relaxed break-words whitespace-pre-wrap">
+                          <p className="text-[13.5px] font-medium leading-relaxed break-words whitespace-pre-wrap tracking-wide">
                             {msg.body}
                           </p>
                         )}
 
                         {/* Metadata row */}
                         <div
-                          className={`flex items-center gap-1.5 justify-end text-[9px] font-bold ${
-                            isOwn ? "text-brand-200" : "text-slate-400"
+                          className={`flex items-center gap-1.5 justify-end text-[9px] font-bold tracking-wider uppercase mt-1 ${
+                            isOwn ? "text-gold-300" : "text-slate-400"
                           }`}
                         >
                           <span>{formatMessageTime(msg.created_at)}</span>
@@ -258,9 +266,9 @@ export default function ChatThread({
                               {isSending ? (
                                 <Clock className="h-3 w-3 animate-spin" />
                               ) : msg.read_at ? (
-                                <CheckCheck className="h-3 w-3 text-brand-300" />
+                                <CheckCheck className="h-3 w-3 text-gold-400" />
                               ) : (
-                                <Check className="h-3 w-3 text-brand-300" />
+                                <Check className="h-3 w-3 text-gold-400/80" />
                               )}
                             </span>
                           )}
@@ -276,17 +284,17 @@ export default function ChatThread({
 
         {/* Typing Indicator */}
         {isOtherPartyTyping && (
-          <div className="flex items-end gap-2.5 justify-start mt-4">
+          <div className="flex items-end gap-3.5 justify-start mt-6 animate-fade-in-up">
             <div className="w-8 shrink-0 flex justify-center">
-              <div className="flex h-8 w-8 select-none items-center justify-center rounded-full bg-brand-50 text-[10px] font-black text-brand-800 border border-brand-200/60 shadow-sm uppercase">
+              <div className="flex h-8 w-8 select-none items-center justify-center rounded-full bg-white text-[10px] font-black text-brand-800 border border-gold-200/50 shadow-sm uppercase tracking-wider">
                 {otherPartyInitials}
               </div>
             </div>
             
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-xs p-3.5 shadow-xs flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div className="bg-white border border-slate-200/60 text-slate-800 rounded-3xl rounded-bl-xs p-4 shadow-sm flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-gold-600 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="h-2 w-2 rounded-full bg-gold-650 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="h-2 w-2 rounded-full bg-gold-700 animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
           </div>
         )}
@@ -299,23 +307,23 @@ export default function ChatThread({
         <button
           type="button"
           onClick={() => scrollToBottom("smooth")}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-brand-700 px-4 py-2 text-xs font-bold text-white shadow-lg hover:bg-brand-850 active:scale-95 transition cursor-pointer z-10 animate-bounce"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-brand-700 border border-brand-900 px-5 py-2.5 text-xs font-black text-white shadow-xl hover:bg-brand-850 hover:shadow-2xl active:scale-95 transition-all cursor-pointer z-10 animate-bounce tracking-wider uppercase"
         >
           <span>New Messages</span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4 text-gold-400" />
         </button>
       )}
 
       {/* Fullscreen Image Lightbox */}
       {lightboxImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 transition-opacity duration-300"
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 transition-all duration-300 backdrop-blur-sm"
           onClick={() => setLightboxImage(null)}
         >
           <button
             type="button"
             onClick={() => setLightboxImage(null)}
-            className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition cursor-pointer"
+            className="absolute top-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-95 transition cursor-pointer border border-white/10"
           >
             <X className="h-6 w-6" />
           </button>
@@ -323,7 +331,7 @@ export default function ChatThread({
           <img
             src={lightboxImage}
             alt="Enlarged view"
-            className="max-h-full max-w-full object-contain rounded-lg shadow-2xl animate-zoom-in"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

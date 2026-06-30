@@ -52,8 +52,13 @@ body {
     display: none !important;
   }
   body.chat-active .chat-active-height {
+    position: fixed !important;
+    inset: 0 !important;
     height: 100dvh !important;
     max-height: 100dvh !important;
+    padding-top: env(safe-area-inset-top, 2.5rem) !important;
+    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
+    background: #FDFDFB !important;
   }
 }
 

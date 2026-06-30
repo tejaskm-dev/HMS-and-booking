@@ -59,7 +59,7 @@ export default function GuestMessagesClient({
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loadingBooking, setLoadingBooking] = useState(false);
-  const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   
   // Modals state

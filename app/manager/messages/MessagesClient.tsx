@@ -62,7 +62,7 @@ export default function MessagesClient({
   // Collapsible Sidebars (Desktop)
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
   const [isListExpanded, setIsListExpanded] = useState(true);
-  const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
 
   // Mobile Sheets / Modals
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -822,14 +822,35 @@ export default function MessagesClient({
         )}
       </div>
 
-      {/* COLUMN 4: Guest Details Sidebar (Desktop) */}
+      {/* COLUMN 4: Guest Details Sidebar (Desktop) / Mobile Slide-over */}
       <div
-        className={`hidden md:flex flex-col shrink-0 h-full border-l border-slate-200 bg-[#F9F9FB] transition-all duration-300 overflow-y-auto p-4 space-y-4 text-left custom-scrollbar ${
-          activeId && isDetailsExpanded ? "w-80" : "w-0 p-0 border-l-0"
-        }`}
+        className={`
+          ${
+            isDetailsExpanded
+              ? "translate-x-0 w-full md:w-80 border-l border-slate-200"
+              : "translate-x-full w-0 md:w-0 md:border-l-0"
+          }
+          transition-all duration-300 ease-in-out
+          fixed md:static inset-y-0 right-0 z-50
+          flex flex-col h-full shrink-0 overflow-y-auto p-4 space-y-4 text-left custom-scrollbar bg-[#F9F9FB]
+        `}
       >
         {activeConversation && (
           <>
+            {/* Mobile Close Header */}
+            <div className="flex items-center justify-between md:hidden pb-2 border-b border-slate-200">
+              <span className="text-xs font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
+                Guest Details
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsDetailsExpanded(false)}
+                className="p-1.5 hover:bg-slate-200/60 rounded-xl text-slate-500 hover:text-slate-850 transition cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
             {/* Card 1: Guest Info */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs">
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">

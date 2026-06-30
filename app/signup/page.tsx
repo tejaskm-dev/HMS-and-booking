@@ -26,6 +26,18 @@ import {
 const secondaryBtn =
   "w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50";
 
+const COUNTRY_CODES = [
+  { code: "+91", flag: "🇮🇳" },
+  { code: "+1", flag: "🇺🇸" },
+  { code: "+44", flag: "🇬🇧" },
+  { code: "+61", flag: "🇦🇺" },
+  { code: "+971", flag: "🇦🇪" },
+  { code: "+65", flag: "🇸🇬" },
+  { code: "+81", flag: "🇯🇵" },
+  { code: "+49", flag: "🇩🇪" },
+  { code: "+33", flag: "🇫🇷" },
+];
+
 interface LocationSuggestion {
   id: number;
   name: string;
@@ -44,7 +56,8 @@ export default function GuestSignupPage() {
 
   // Step 2
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
+  const [phoneNo, setPhoneNo] = useState("");
   const [terms, setTerms] = useState(false);
 
   // Date of Birth (Split Select State)
@@ -141,6 +154,7 @@ export default function GuestSignupPage() {
 
     setLoading(true);
     try {
+      const phone = phoneNo ? `${countryCode}${phoneNo}` : "";
       await signUpGuest({ email, password, fullName, dob, phone, location });
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
@@ -350,14 +364,32 @@ export default function GuestSignupPage() {
 
           <div>
             <FieldLabel>Phone number</FieldLabel>
-            <IconField
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              required
-              icon={<PhoneIcon className="h-4 w-4" />}
-            />
+            <div className="flex gap-2">
+              <div className="relative shrink-0 flex items-center">
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="h-full pl-3 pr-8 py-2.5 rounded-xl border border-slate-250 bg-white text-sm font-semibold focus:border-brand-500 focus:outline-none cursor-pointer appearance-none"
+                >
+                  {COUNTRY_CODES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="relative flex-1">
+                <PhoneIcon className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="tel"
+                  required
+                  value={phoneNo}
+                  onChange={(e) => setPhoneNo(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Mobile number"
+                  className="w-full rounded-xl border border-slate-250 bg-white pl-10 pr-4 py-2.5 text-sm outline-none focus:border-brand-500"
+                />
+              </div>
+            </div>
           </div>
 
           <label className="flex items-start gap-2 text-sm text-slate-600">

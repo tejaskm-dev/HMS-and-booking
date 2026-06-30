@@ -430,7 +430,9 @@ export interface Conversation {
     name: string;
     location: string;
     image_url: string | null;
+    manager_id?: string;
     profiles?: {
+      id: string;
       full_name: string | null;
       phone: string | null;
       email: string | null;

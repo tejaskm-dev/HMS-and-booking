@@ -42,6 +42,29 @@ const supabase = createClient();
 
 const WHATSAPP_SVG_PATH = "M19.077 4.928A9.886 9.886 0 0 0 12.04 2c-5.433 0-9.854 4.417-9.856 9.852a9.81 9.81 0 0 0 1.32 4.967L2 22l5.302-1.39a9.82 9.82 0 0 0 4.735 1.228h.004c5.43 0 9.85-4.417 9.853-9.852a9.886 9.886 0 0 0-2.817-6.93M12.04 20.048a8.09 8.09 0 0 1-4.14-1.135l-.297-.176-3.083.808.822-3.006-.194-.308a8.095 8.095 0 0 1-1.243-4.38c0-4.466 3.64-8.102 8.112-8.102 2.164 0 4.2.843 5.73 2.376a8.046 8.046 0 0 1 2.373 5.737c-.002 4.468-3.64 8.106-8.11 8.106m4.446-6.07c-.244-.122-1.442-.712-1.666-.793-.223-.081-.385-.122-.547.122-.162.244-.629.793-.771.956-.143.162-.285.183-.529.06-.244-.12-1.03-.38-1.962-1.21-.725-.647-1.214-1.447-1.356-1.69-.142-.244-.015-.376.107-.497.11-.11.244-.285.366-.427.122-.142.162-.244.244-.407.08-.162.04-.305-.02-.426-.06-.122-.547-1.32-.75-1.81-.197-.476-.398-.41-.547-.418-.14-.007-.305-.007-.467-.007a.9.9 0 0 0-.65.305c-.223.244-.853.833-.853 2.031 0 1.198.873 2.356.995 2.519.122.162 1.717 2.622 4.16 3.678.58.252 1.034.402 1.388.514.584.185 1.116.16 1.537.097.47-.07 1.443-.59 1.646-1.159.203-.57.203-1.057.142-1.158-.06-.102-.223-.163-.467-.285";
 
+const normalizeConversation = (c: any): any => {
+  if (!c) return c;
+  const rawProfiles = c.profiles;
+  const profiles = Array.isArray(rawProfiles) ? rawProfiles[0] : rawProfiles;
+  
+  const rawHotels = c.hotels;
+  let hotels = Array.isArray(rawHotels) ? rawHotels[0] : rawHotels;
+  if (hotels) {
+    const rawHotelProfiles = hotels.profiles;
+    const hotelProfiles = Array.isArray(rawHotelProfiles) ? rawHotelProfiles[0] : rawHotelProfiles;
+    hotels = {
+      ...hotels,
+      profiles: hotelProfiles,
+    };
+  }
+
+  return {
+    ...c,
+    profiles,
+    hotels,
+  };
+};
+
 export default function GuestMessagesClient({
   initialConversations,
   initialMessages,
@@ -53,7 +76,9 @@ export default function GuestMessagesClient({
   hostEmail: propHostEmail,
 }: GuestMessagesClientProps) {
   const router = useRouter();
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+  const [conversations, setConversations] = useState<Conversation[]>(() =>
+    initialConversations.map(normalizeConversation)
+  );
   const [prevInitialConversations, setPrevInitialConversations] = useState<Conversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(activeConversationId);
 
@@ -86,7 +111,7 @@ export default function GuestMessagesClient({
   // Sync initialConversations on change during render phase (React 19 pattern)
   if (initialConversations !== prevInitialConversations) {
     setPrevInitialConversations(initialConversations);
-    setConversations(initialConversations);
+    setConversations(initialConversations.map(normalizeConversation));
   }
 
   const activeConversation = useMemo(() => {
@@ -179,7 +204,7 @@ export default function GuestMessagesClient({
             .order("last_message_at", { ascending: false });
 
           if (data) {
-            setConversations(data);
+            setConversations(data.map(normalizeConversation));
           }
         }
       )
@@ -243,10 +268,45 @@ export default function GuestMessagesClient({
   const backUrl = back === "property" && resolvedHotelId ? `/hotels/${resolvedHotelId}` : "/";
   const backText = back === "property" ? "Back to property" : "Back to home";
 
-  const hostProfile = activeConversation?.hotels?.profiles;
+  const rawHostProfile = activeConversation?.hotels?.profiles;
+  const hostProfile = useMemo(() => {
+    return Array.isArray(rawHostProfile) ? rawHostProfile[0] : rawHostProfile;
+  }, [rawHostProfile]);
+
   const hostName = hostProfile?.full_name || "Hotel Host";
   const hostPhone = hostProfile?.phone;
-  const hostEmail = propHostEmail;
+
+  const [hostEmail, setHostEmail] = useState<string | null>(propHostEmail);
+
+  useEffect(() => {
+    const managerId = hostProfile?.id || activeConversation?.hotels?.manager_id;
+    if (!managerId) {
+      setHostEmail(null);
+      return;
+    }
+
+    if (activeConversation?.id === activeConversationId && propHostEmail) {
+      setHostEmail(propHostEmail);
+      return;
+    }
+
+    let active = true;
+    fetch(`/api/messages/participant-email?userId=${managerId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (active) {
+          setHostEmail(data.email || null);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch host email:", err);
+        if (active) setHostEmail(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activeConversation?.id, hostProfile?.id, activeConversation?.hotels?.manager_id, propHostEmail, activeConversationId]);
 
   // Host initials for selected avatar
   const hostInitials = useMemo(() => {

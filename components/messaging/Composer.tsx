@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Camera, Paperclip, Smile, Send, X } from "lucide-react";
+import { Camera, Paperclip, Smile, Send, X, Clock } from "lucide-react";
 import EmojiPicker from "./EmojiPicker";
+import { compressFile } from "@/lib/compression";
 
 interface ComposerProps {
   conversationId: string;
@@ -20,6 +21,7 @@ export default function Composer({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,35 +68,45 @@ export default function Composer({
     };
   }, [text, onTyping]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    setIsCompressing(true);
     const filesArray = Array.from(files);
-    const validFiles = filesArray.filter((file) => {
-      if (!file.type.startsWith("image/")) {
-        alert(`"${file.name}" is not a supported image format.`);
-        return false;
+
+    try {
+      const compressedFiles = await Promise.all(
+        filesArray.map(async (file) => {
+          if (file.size > 200 * 1024 * 1024) {
+            alert(`"${file.name}" exceeds the 200MB size limit.`);
+            return null;
+          }
+          return await compressFile(file);
+        })
+      );
+
+      const validFiles = compressedFiles.filter((f): f is File => f !== null);
+
+      if (validFiles.length === 0) {
+        setIsCompressing(false);
+        return;
       }
-      if (file.size > 20 * 1024 * 1024) {
-        alert(`"${file.name}" exceeds the 20MB size limit.`);
-        return false;
+
+      setAttachments((prev) => {
+        const next = [...prev, ...validFiles];
+        previews.forEach((url) => URL.revokeObjectURL(url));
+        const newUrls = next.map((file) => URL.createObjectURL(file));
+        setPreviews(newUrls);
+        return next;
+      });
+    } catch (err) {
+      console.error("Error compressing files:", err);
+    } finally {
+      setIsCompressing(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
-      return true;
-    });
-
-    if (validFiles.length === 0) return;
-
-    setAttachments((prev) => {
-      const next = [...prev, ...validFiles];
-      previews.forEach((url) => URL.revokeObjectURL(url));
-      const newUrls = next.map((file) => URL.createObjectURL(file));
-      setPreviews(newUrls);
-      return next;
-    });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
     }
   };
 
@@ -202,11 +214,15 @@ export default function Composer({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={disabled}
+              disabled={disabled || isCompressing}
               className="flex h-9 w-9 items-center justify-center rounded-full text-slate-450 hover:bg-slate-100 hover:text-slate-700 transition disabled:opacity-40 cursor-pointer"
               title="Attach photos"
             >
-              <Paperclip className="h-4.5 w-4.5" />
+              {isCompressing ? (
+                <Clock className="h-4.5 w-4.5 animate-spin text-brand-600" />
+              ) : (
+                <Paperclip className="h-4.5 w-4.5" />
+              )}
             </button>
           </div>
 
@@ -246,7 +262,7 @@ export default function Composer({
           <button
             type="submit"
             onClick={handleSend}
-            disabled={disabled || (!text.trim() && attachments.length === 0)}
+            disabled={disabled || isCompressing || (!text.trim() && attachments.length === 0)}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A4335] text-white hover:bg-brand-900 hover:scale-[1.03] disabled:bg-slate-100 disabled:text-slate-300 disabled:scale-100 transition-all shadow-3xs active:scale-95 cursor-pointer shrink-0"
           >
             <Send className="h-4 w-4 text-white" />

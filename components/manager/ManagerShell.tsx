@@ -22,6 +22,7 @@ import {
   MessageSquareIcon,
 } from "@/components/icons";
 import type { UserRole } from "@/lib/types";
+import EditProfileModal from "@/components/EditProfileModal";
 
 export interface ShellHotel {
   id: string;
@@ -72,6 +73,7 @@ export function ManagerShell({
 }) {
   const pathname = usePathname() ?? "";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // Wizard / waiting render without the dashboard chrome.
   if (isBareRoute(pathname)) return <>{children}</>;
@@ -126,12 +128,18 @@ export function ManagerShell({
           >
             <GlobeIcon className="h-[18px] w-[18px]" /> View site
           </Link>
-          <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
+          <button
+            onClick={() => setIsEditProfileOpen(true)}
+            className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-100 transition text-left cursor-pointer"
+          >
+            <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white shrink-0">
               {userName.slice(0, 1).toUpperCase()}
             </div>
-            <span className="truncate text-sm font-medium text-slate-700">{userName}</span>
-          </div>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-sm font-medium text-slate-700 leading-tight">{userName}</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Edit Profile</p>
+            </div>
+          </button>
         </div>
       </aside>
 
@@ -175,12 +183,21 @@ export function ManagerShell({
                 >
                   <GlobeIcon className="h-[18px] w-[18px]" /> View site
                 </Link>
-                <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
+                <button
+                  onClick={() => {
+                    setMobileNavOpen(false);
+                    setIsEditProfileOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-100 transition text-left cursor-pointer"
+                >
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white shrink-0">
                     {userName.slice(0, 1).toUpperCase()}
                   </div>
-                  <span className="truncate text-sm font-medium text-slate-700">{userName}</span>
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-700 leading-tight">{userName}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Edit Profile</p>
+                  </div>
+                </button>
               </div>
             </motion.aside>
           </div>
@@ -246,6 +263,13 @@ export function ManagerShell({
           })}
         </nav>
       </div>
+      
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        onProfileUpdated={() => window.location.reload()}
+      />
     </div>
   );
 }

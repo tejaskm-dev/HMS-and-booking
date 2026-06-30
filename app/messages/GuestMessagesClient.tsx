@@ -25,7 +25,7 @@ import {
 import { useConversationMessages } from "@/components/messaging/useConversationMessages";
 import ChatThread from "@/components/messaging/ChatThread";
 import Composer from "@/components/messaging/Composer";
-import type { Conversation, Message, Booking } from "@/lib/types";
+import type { Conversation, Message, Booking, Profile } from "@/lib/types";
 
 interface GuestMessagesClientProps {
   initialConversations: Conversation[];
@@ -61,6 +61,20 @@ export default function GuestMessagesClient({
   const [loadingBooking, setLoadingBooking] = useState(false);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [myProfile, setMyProfile] = useState<Profile | null>(null);
+  
+  useEffect(() => {
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUserId)
+      .single()
+      .then(({ data }) => {
+        if (data) setMyProfile(data as Profile);
+      });
+  }, [currentUserId]);
+
+  const isMyPhoneVerified = !!myProfile?.phone;
   
   // Modals state
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -768,26 +782,51 @@ export default function GuestMessagesClient({
                     <div className="grid grid-cols-3 gap-1.5">
                       {hostPhone ? (
                         <>
-                          <a
-                            href={`tel:${hostPhone}`}
-                            className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-200 rounded-xl text-slate-750 text-[10px] font-bold bg-white hover:bg-slate-50 transition shadow-3xs"
-                            title="Call Host"
-                          >
-                            <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <span>Call</span>
-                          </a>
-                          <a
-                            href={`https://wa.me/${hostPhone.replace(/[^0-9]/g, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-200 rounded-xl text-slate-750 text-[10px] font-bold bg-white hover:bg-slate-50 transition shadow-3xs"
-                            title="Message on WhatsApp"
-                          >
-                            <svg className="h-3.5 w-3.5 text-[#25D366] shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                              <path d={WHATSAPP_SVG_PATH} />
-                            </svg>
-                            <span className="truncate">WhatsApp</span>
-                          </a>
+                          {isMyPhoneVerified ? (
+                            <a
+                              href={`tel:${hostPhone}`}
+                              className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-200 rounded-xl text-slate-750 text-[10px] font-bold bg-white hover:bg-slate-50 transition shadow-3xs"
+                              title="Call Host"
+                            >
+                              <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                              <span>Call</span>
+                            </a>
+                          ) : (
+                            <button
+                              disabled
+                              className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-100 rounded-xl text-slate-350 text-[10px] font-bold bg-slate-50 opacity-60 cursor-not-allowed"
+                              title="Verify your phone to call"
+                            >
+                              <Phone className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                              <span>Call</span>
+                            </button>
+                          )}
+
+                          {isMyPhoneVerified ? (
+                            <a
+                              href={`https://wa.me/${hostPhone.replace(/[^0-9]/g, "")}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-200 rounded-xl text-slate-750 text-[10px] font-bold bg-white hover:bg-slate-50 transition shadow-3xs"
+                              title="Message on WhatsApp"
+                            >
+                              <svg className="h-3.5 w-3.5 text-[#25D366] shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                <path d={WHATSAPP_SVG_PATH} />
+                              </svg>
+                              <span className="truncate">WhatsApp</span>
+                            </a>
+                          ) : (
+                            <button
+                              disabled
+                              className="flex flex-col sm:flex-row items-center justify-center gap-1 px-1 py-2 border border-slate-100 rounded-xl text-slate-350 text-[10px] font-bold bg-slate-50 opacity-60 cursor-not-allowed"
+                              title="Verify your phone to WhatsApp"
+                            >
+                              <svg className="h-3.5 w-3.5 text-slate-300 shrink-0 fill-current" viewBox="0 0 24 24">
+                                <path d={WHATSAPP_SVG_PATH} />
+                              </svg>
+                              <span className="truncate">WhatsApp</span>
+                            </button>
+                          )}
                         </>
                       ) : null}
                       {hostEmail ? (
@@ -808,6 +847,12 @@ export default function GuestMessagesClient({
                         </div>
                       )}
                     </div>
+
+                    {!isMyPhoneVerified && hostPhone && (
+                      <p className="text-[9px] text-amber-700 font-bold mt-2 bg-amber-50 border border-amber-100 rounded-lg p-2 text-left leading-normal">
+                        ⚠️ Call & WhatsApp features are disabled until you verify your mobile number in your profile settings.
+                      </p>
+                    )}
                   </div>
                 </div>
 

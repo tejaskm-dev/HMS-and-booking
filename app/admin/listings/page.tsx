@@ -98,6 +98,44 @@ export default function ListingsPage() {
   );
 }
 
+function parseAmenities(val: unknown): string[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    const clean = val.trim();
+    if (clean.startsWith("{") && clean.endsWith("}")) {
+      const content = clean.slice(1, -1).trim();
+      if (!content) return [];
+      const result: string[] = [];
+      let current = "";
+      let inQuotes = false;
+      let escaped = false;
+      for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        if (escaped) {
+          current += char;
+          escaped = false;
+        } else if (char === "\\") {
+          escaped = true;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result
+        .map(x => x.replace(/^["']|["']$/g, "").trim())
+        .filter(Boolean);
+    }
+    return clean.split(",").map(x => x.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 function PreviewPanel({ row, onClose, listKey }: { row: Row | null; onClose: () => void; listKey: string }) {
   const [reason, setReason] = useState("");
   const [pending, startTransition] = useTransition();
@@ -175,13 +213,17 @@ function PreviewPanel({ row, onClose, listKey }: { row: Row | null; onClose: () 
             </div>
           )}
 
-          {(h.amenities?.length ?? 0) > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {h.amenities!.slice(0, 12).map((a) => (
-                <span key={a} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] text-slate-600">{a}</span>
-              ))}
-            </div>
-          )}
+          {(() => {
+            const list = parseAmenities(h.amenities);
+            if (list.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-1">
+                {list.slice(0, 12).map((a) => (
+                  <span key={a} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] text-slate-600">{a}</span>
+                ))}
+              </div>
+            );
+          })()}
 
           <Link href={`/hotels/${h.id}`} target="_blank" className="block text-sm font-semibold text-brand-700 hover:underline">
             Open full listing preview →

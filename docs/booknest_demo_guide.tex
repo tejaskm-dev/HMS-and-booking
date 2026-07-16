@@ -1,0 +1,3066 @@
+%==============================================================================
+% BookNest --- Complete Technical Guide & Demo Preparation Handbook
+% Team Neuron
+%
+% Build with:  tectonic docs/booknest_demo_guide.tex
+%          or: pdflatex docs/booknest_demo_guide.tex   (run twice for TOC)
+%==============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.3cm,bottom=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{mdframed}
+\usepackage[hidelinks]{hyperref}
+
+%------------------------------------------------------------------ colours
+\definecolor{primary}{RGB}{15, 90, 70}
+\definecolor{gold}{RGB}{201, 162, 77}
+\definecolor{codebg}{RGB}{247, 247, 245}
+\definecolor{codeline}{RGB}{215, 215, 210}
+\definecolor{notebg}{RGB}{239, 246, 255}
+\definecolor{noteborder}{RGB}{59, 130, 246}
+\definecolor{warnbg}{RGB}{255, 247, 237}
+\definecolor{warnborder}{RGB}{234, 88, 12}
+\definecolor{saybg}{RGB}{240, 253, 244}
+\definecolor{sayborder}{RGB}{22, 163, 74}
+\definecolor{kw}{RGB}{155, 35, 147}
+\definecolor{cmt}{RGB}{110, 120, 130}
+\definecolor{str}{RGB}{196, 26, 22}
+
+\hypersetup{colorlinks=true, linkcolor=primary, urlcolor=primary,
+            pdftitle={BookNest Technical Guide}, pdfauthor={Team Neuron}}
+
+%------------------------------------------------------------------ headings
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection.}{0.6em}{}[{\titlerule[0.8pt]}]
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{primary}}{}{0em}{}
+\setlength{\parskip}{6pt}
+
+%------------------------------------------------------------------ listings
+\lstdefinestyle{code}{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{kw}\bfseries,
+  commentstyle=\color{cmt}\itshape,
+  stringstyle=\color{str},
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{codeline},
+  framesep=5pt,
+  xleftmargin=4pt,
+  xrightmargin=2pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  captionpos=b,
+  numbers=none,
+  tabsize=2,
+}
+\lstset{style=code}
+
+\lstdefinelanguage{TS}{
+  morekeywords={const,let,var,function,async,await,return,if,else,for,while,
+    import,export,from,type,interface,new,class,extends,implements,try,catch,
+    finally,throw,default,of,in,null,undefined,true,false,this,as,void,Promise},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+
+%------------------------------------------------------------------ boxes
+\newmdenv[backgroundcolor=notebg, linecolor=noteborder, linewidth=2.5pt,
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  innerleftmargin=9pt, innerrightmargin=9pt, innertopmargin=7pt,
+  innerbottommargin=7pt, skipabove=8pt, skipbelow=8pt]{notebox}
+
+\newmdenv[backgroundcolor=warnbg, linecolor=warnborder, linewidth=2.5pt,
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  innerleftmargin=9pt, innerrightmargin=9pt, innertopmargin=7pt,
+  innerbottommargin=7pt, skipabove=8pt, skipbelow=8pt]{warnbox}
+
+\newmdenv[backgroundcolor=saybg, linecolor=sayborder, linewidth=2.5pt,
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  innerleftmargin=9pt, innerrightmargin=9pt, innertopmargin=7pt,
+  innerbottommargin=7pt, skipabove=8pt, skipbelow=8pt]{saybox}
+
+% "Say this in the demo" helper
+\newcommand{\saythis}[1]{\begin{saybox}\textbf{\small\color{primary}SAY THIS:} \textit{#1}\end{saybox}}
+
+% FAQ helpers
+\newcommand{\Q}[1]{\vspace{7pt}\noindent\textbf{\color{primary}Q.}~\textbf{#1}\par\vspace{1pt}}
+\newcommand{\A}[1]{\noindent #1\par}
+
+\newcommand{\file}[1]{\texttt{\small #1}}
+
+%------------------------------------------------------------------ header
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small\color{primary}BookNest --- Technical Guide}
+\lhead{\small Team Neuron}
+\cfoot{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+
+%==============================================================================
+\begin{titlepage}
+\centering
+\vspace*{2.2cm}
+{\Huge\bfseries\color{primary} BookNest\par}
+\vspace{0.4cm}
+{\large Hotel Management \& Booking System\par}
+\vspace{1.4cm}
+\rule{0.75\textwidth}{1.2pt}\par
+\vspace{0.7cm}
+{\LARGE\bfseries Complete Technical Guide\par}
+\vspace{0.35cm}
+{\large \& Demo Preparation Handbook\par}
+\vspace{0.7cm}
+\rule{0.75\textwidth}{1.2pt}\par
+\vspace{1.4cm}
+
+\begin{minipage}{0.82\textwidth}
+\centering\itshape
+Every system in this project, explained from first principles ---
+what it does, how it is wired, why we chose it, and the exact
+answers to the questions you will be asked.
+\end{minipage}
+
+\vspace{2.4cm}
+{\large\bfseries Team Neuron\par}
+\vspace{0.3cm}
+{\small \href{https://hms-and-booking.vercel.app}{hms-and-booking.vercel.app}\par}
+\vspace{1.6cm}
+{\small \today\par}
+\end{titlepage}
+
+%==============================================================================
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{How To Use This Document}
+
+This document has three kinds of content, and you should read them differently.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Explanations.} Plain-English descriptions of every system. Read
+        these to \emph{understand}. If a sentence uses a word you cannot define,
+        the Glossary (Section~\ref{sec:glossary}) defines it.
+  \item \textbf{Code.} The actual code from the repository, with the file path
+        above it. You should be able to point at any of these and explain what
+        each line does.
+  \item \textbf{Green ``SAY THIS'' boxes.} A one-or-two-sentence answer, written
+        the way you would speak it out loud. If you are asked a question and your
+        mind goes blank, say the green box.
+\end{enumerate}
+
+\begin{notebox}
+\textbf{The single most important piece of advice.} When someone asks
+``how does X work?'', do not start with the code. Start with the \emph{problem}
+X solves, then say what you built, then offer the detail. For example:
+\emph{``The problem is two people can book the last room at the same moment.
+So booking is not done in JavaScript --- it is a Postgres function that takes a
+row lock on each night's inventory before it writes. Want me to walk through it?''}
+That sentence alone tells an examiner you understand your own system.
+\end{notebox}
+
+\newpage
+%==============================================================================
+\section{The Big Picture}
+
+\subsection{What BookNest is}
+
+BookNest is a hotel booking platform. It is not a toy: it takes real payments
+through a real payment gateway, sends real email, and enforces real security
+rules at the database level. It has four kinds of users:
+
+\begin{longtable}{@{}p{2.4cm}p{12.4cm}@{}}
+\toprule
+\textbf{Role} & \textbf{What they can do} \\
+\midrule
+\endhead
+\textbf{Guest} & Search hotels, view listings, book rooms, pay online, check in
+with a QR code, review their stay, message the hotel. \\
+\addlinespace
+\textbf{Manager} & Create hotel listings through a 9-step wizard, run a front
+desk (check guests in/out, take walk-in bookings), view earnings, invite staff,
+reply to guest messages. \\
+\addlinespace
+\textbf{Staff} & A real login account invited by a manager. Gets a subset of the
+manager's powers on \emph{one specific hotel}, controlled by a permissions array. \\
+\addlinespace
+\textbf{Admin} & Approve or reject manager verification requests and hotel
+listings, suspend users, change roles, view platform statistics. Every admin
+action is written to an audit log. \\
+\bottomrule
+\end{longtable}
+
+\subsection{The technology, in one line each}
+
+\begin{longtable}{@{}p{3.5cm}p{11.3cm}@{}}
+\toprule
+\textbf{Layer} & \textbf{Choice and one-line justification} \\
+\midrule
+\endhead
+Framework & \textbf{Next.js 16} (App Router). One codebase serves both the
+website and the API, so we never maintain two projects. \\
+\addlinespace
+UI library & \textbf{React 19}. Industry standard; Next.js is built on it. \\
+\addlinespace
+Language & \textbf{TypeScript}. Catches type mistakes before the code runs. \\
+\addlinespace
+Database & \textbf{Supabase} = hosted \textbf{PostgreSQL} + Auth + Storage +
+Realtime. One service instead of four. \\
+\addlinespace
+Security model & \textbf{Row Level Security} (Postgres). The database itself
+refuses to return rows you are not allowed to see. \\
+\addlinespace
+Payments & \textbf{Razorpay}. India-first, supports UPI, cards, netbanking.
+Has a proper test mode. \\
+\addlinespace
+Realtime chat & \textbf{Supabase Realtime} (WebSockets over Postgres
+replication). No separate socket server to run. \\
+\addlinespace
+Maps & \textbf{MapLibre GL} + \textbf{OpenFreeMap}, with \textbf{Leaflet}
+as a fallback. Zero API keys, zero cost, no billing surprises. \\
+\addlinespace
+Email & \textbf{Brevo} HTTP API. Works from serverless functions (SMTP often
+does not) and has a free tier without needing a custom domain. \\
+\addlinespace
+Styling & \textbf{Tailwind CSS v4}. Styles live next to the markup. \\
+\addlinespace
+Hosting & \textbf{Vercel}. Made by the Next.js team; push to GitHub and it deploys. \\
+\bottomrule
+\end{longtable}
+
+\subsection{The life of a request}
+
+This diagram is worth memorising. Almost every question about ``how does the app
+work'' is answered by pointing at one box in it.
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+                            BROWSER
+                               |
+        +----------------------+----------------------+
+        |                      |                      |
+    (1) Page load        (2) Data fetch        (3) Live updates
+        |                      |                      |
+        v                      v                      v
+  +-----------+        +---------------+     +------------------+
+  | proxy.ts  |        | Route Handler |     | Supabase Realtime|
+  | (gate)    |        | /api/...      |     | WebSocket        |
+  +-----+-----+        +-------+-------+     +---------+--------+
+        |                      |                       |
+        v                      v                       |
+  +-----------------------------------+                |
+  |  Next.js Server Component (RSC)   |                |
+  |  - runs ONLY on the server        |                |
+  |  - can read the DB directly       |                |
+  +-----------------+-----------------+                |
+                    |                                  |
+                    v                                  |
+             +-------------------------------+         |
+             |      SUPABASE (PostgreSQL)    |<--------+
+             |  RLS policies + RPC functions |
+             |  Auth  |  Storage  | Realtime |
+             +-------------------------------+
+                    ^                    ^
+                    |                    |
+             Razorpay webhook      Brevo email API
+             (POST /api/webhooks)  (outbound HTTPS)
+\end{lstlisting}
+
+\saythis{The browser talks to Next.js. Next.js talks to Postgres. But even if
+somebody bypassed Next.js entirely and hit the database directly with our public
+key, Row Level Security would still stop them from reading someone else's
+bookings. Security is enforced at the bottom of the stack, not the top.}
+
+\newpage
+%==============================================================================
+\section{Next.js: Structure and How Files Are Linked}
+
+\subsection{The one rule that explains the whole folder}
+
+In the Next.js \textbf{App Router}, \emph{a folder is a URL, and a file named
+\file{page.tsx} is what the user sees at that URL.}
+
+\begin{lstlisting}
+app/page.tsx                -> /
+app/hotels/page.tsx         -> /hotels
+app/hotels/[id]/page.tsx    -> /hotels/<any-id>       ([id] = dynamic segment)
+app/manager/staff/page.tsx  -> /manager/staff
+app/api/bookings/route.ts   -> /api/bookings          (an API endpoint, not a page)
+\end{lstlisting}
+
+There is no router configuration file anywhere in this project. There is no
+\file{routes.js}. The folder structure \emph{is} the routing table. This is why
+the \file{app/} directory looks the way it does.
+
+\subsection{The special filenames}
+
+Inside any folder, certain filenames have reserved meaning. These are the ones
+we use:
+
+\begin{longtable}{@{}p{2.9cm}p{11.9cm}@{}}
+\toprule
+\textbf{Filename} & \textbf{What Next.js does with it} \\
+\midrule
+\endhead
+\file{page.tsx} & The page itself. Must be present for the URL to exist. \\
+\addlinespace
+\file{layout.tsx} & A wrapper that persists across navigations inside that
+folder. \file{app/layout.tsx} is the root layout (html/body, fonts, navbar).
+\file{app/manager/layout.tsx} wraps every manager page in the sidebar shell. \\
+\addlinespace
+\file{loading.tsx} & Shown automatically while \file{page.tsx} is fetching data.
+Next.js wraps the page in a React \texttt{<Suspense>} boundary for you. This is
+why we have \file{app/hotels/loading.tsx} showing skeleton cards. \\
+\addlinespace
+\file{template.tsx} & Like a layout, but re-created on every navigation. We use
+\file{app/manager/template.tsx} and \file{app/admin/template.tsx} for page
+transition animations, which need to re-mount to re-run. \\
+\addlinespace
+\file{route.ts} & Turns the folder into an \textbf{API endpoint} instead of a
+page. Exports functions named \texttt{GET}, \texttt{POST}, etc. \\
+\addlinespace
+\file{actions.ts} & Not a Next.js reserved name --- \emph{our} convention. Holds
+Server Actions (see below). Marked with \texttt{"use server"} at the top. \\
+\addlinespace
+\file{proxy.ts} & Runs \emph{before} every matching request. In Next.js 15 and
+earlier this file was called \file{middleware.ts}; Next.js 16 renamed the
+convention to \file{proxy.ts}. Ours guards the protected routes. \\
+\bottomrule
+\end{longtable}
+
+\begin{notebox}
+\textbf{Why is our middleware called \file{proxy.ts}?} Because we are on Next.js
+16, which renamed the convention. The function inside is still just a function
+that receives a request and returns a response. If an examiner says ``I thought
+middleware was called middleware.ts'', they are right --- for Next.js 15. This is
+a good thing to know; it shows you are on the current version and understand why.
+\end{notebox}
+
+\subsection{Server Components vs Client Components --- the mental model}
+
+This is the concept most people get wrong, so learn it properly.
+
+\textbf{By default, every component in \file{app/} is a Server Component.} It
+runs on the server, once, and only its resulting HTML is sent to the browser.
+Its JavaScript is \emph{never downloaded by the user}. It can \texttt{await}
+directly. It can read the database. It can read secrets.
+
+\textbf{A file that starts with \texttt{"use client"} is a Client Component.}
+Its JavaScript \emph{is} shipped to the browser. It can use \texttt{useState},
+\texttt{useEffect}, \texttt{onClick}, and browser APIs like the camera. It
+cannot read secrets, because the user can read its source.
+
+\begin{lstlisting}[language=TS,caption={app/hotels/[id]/page.tsx --- a Server Component. Note: no "use client", and it awaits a database read directly.}]
+export const revalidate = 60;   // ISR: regenerate this page at most once a minute
+
+export default async function HotelDetailPage({ params }) {
+  const { id } = await params;
+
+  // This runs on the SERVER. The user never sees this query.
+  let detail = await getPublicHotel(id);
+  if (!detail) notFound();
+
+  return <div> ... </div>;
+}
+\end{lstlisting}
+
+The rule of thumb we followed across the whole codebase:
+
+\begin{quote}
+\emph{Fetch data in a Server Component. Pass it down as props into a small
+Client Component that handles the interactivity.}
+\end{quote}
+
+You can see this exact pattern everywhere:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \file{app/dashboard/page.tsx} (server, fetches) renders
+        \file{app/dashboard/DashboardClient.tsx} (client, interactive).
+  \item \file{app/hotels/page.tsx} renders \file{app/hotels/HotelsClient.tsx}.
+  \item \file{app/manager/staff/page.tsx} renders \file{StaffClient.tsx}.
+  \item \file{app/messages/page.tsx} renders \file{GuestMessagesClient.tsx}.
+\end{itemize}
+
+\saythis{Server Components render on the server and ship zero JavaScript, so the
+page is fast and the database query never reaches the browser. We only opt into
+a Client Component where we genuinely need interactivity --- a map, a date picker,
+the chat box. That is why the naming convention across the repo is
+\texttt{page.tsx} for the server half and \texttt{SomethingClient.tsx} for the
+interactive half.}
+
+\subsection{The four ways data moves in this app}
+
+We do not use one data-fetching strategy. We deliberately use four, each where
+it fits. Being able to say \emph{why} each one is used where it is used is the
+single most impressive thing you can do in this demo.
+
+\subsubsection{1. Server Component reads the database directly}
+
+Used for: public pages that must be fast and SEO-friendly (home page, hotel
+list, hotel detail page).
+
+\begin{lstlisting}[language=TS]
+// app/hotels/[id]/page.tsx  -- runs on server, no API route involved
+const detail = await getPublicHotel(id);   // lib/hotels.ts -> Supabase
+\end{lstlisting}
+
+No API endpoint exists for this. The page talks to Postgres and returns HTML.
+One network round trip for the user instead of two.
+
+\subsubsection{2. Route Handler + SWR (client-side fetching)}
+
+Used for: dashboards, where data changes and the user expects it to refresh.
+
+\begin{lstlisting}[language=TS,caption={lib/swr.ts --- one shared fetcher so preloading and fetching use the same cache key}]
+export const fetcher = (url: string) =>
+  fetch(url).then((r) => {
+    if (!r.ok) throw new Error(`Request to ${url} failed with status ${r.status}`);
+    return r.json();
+  });
+
+// Maps a manager nav route to the API endpoint that page reads, for preloading.
+export function managerApiForRoute(href: string): string | null {
+  if (href.startsWith("/manager/hotels")) return "/api/manager/hotels";
+  if (href.startsWith("/manager/manage")) return "/api/manager/manage";
+  if (href.startsWith("/manager/staff"))  return "/api/manager/staff";
+  return null;
+}
+\end{lstlisting}
+
+\textbf{SWR} stands for \emph{stale-while-revalidate}. When you open a page, SWR
+instantly shows the last data it had (stale), then quietly re-fetches in the
+background and swaps in the fresh data. The dashboard feels instant.
+
+The \texttt{managerApiForRoute} function powers a nice trick: when you
+\emph{hover} over a sidebar link, we call SWR's \texttt{preload()} for the
+endpoint that page will need. By the time you click, the data has already
+arrived.
+
+\subsubsection{3. Server Actions}
+
+Used for: writes triggered by a form or a button, where we want to avoid writing
+an API endpoint at all.
+
+A Server Action is a function marked \texttt{"use server"} that you can
+\emph{import and call directly from a Client Component}. Next.js secretly turns
+the call into an HTTP POST. You never write the fetch, the URL, or the JSON.
+
+\begin{lstlisting}[language=TS,caption={app/messages/actions.ts}]
+"use server";
+
+export async function markRead(conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: conversation } = await supabase
+    .from("conversations").select("guest_id").eq("id", conversationId).single();
+  if (!conversation) return;
+
+  const isGuest = conversation.guest_id === user.id;
+  await supabase
+    .from("conversations")
+    .update(isGuest ? { guest_unread: 0 } : { host_unread: 0 })
+    .eq("id", conversationId);
+
+  revalidatePath(`/messages`);          // tell Next.js those pages are stale
+  revalidatePath(`/manager/messages`);
+}
+\end{lstlisting}
+
+In the chat hook we simply write \texttt{await apiMarkRead(id)}. It looks like a
+local function call. It is actually a secure server round trip.
+
+\begin{warnbox}
+\textbf{The trap.} A Server Action is a public HTTP endpoint whether you like it
+or not. Anyone can call it with any arguments. That is why \emph{every} action in
+this codebase re-checks \texttt{auth.getUser()} and relies on RLS --- we never
+assume the caller is who the UI says they are.
+\end{warnbox}
+
+\subsubsection{4. Realtime WebSocket subscription}
+
+Used for: chat only. The browser opens a persistent connection to Supabase and
+Postgres pushes new rows to it. Covered fully in Section~\ref{sec:messaging}.
+
+\subsection{Caching: how the public pages stay fast}
+
+Three layers, all visible in the code.
+
+\textbf{(a) \texttt{unstable\_cache} with a tag.} The approved-hotels query is
+expensive (it joins rooms, reviews and photos). We cache its \emph{result} in
+Next.js's data cache, under the tag \texttt{"hotels"}.
+
+\begin{lstlisting}[language=TS,caption={lib/hotels.ts}]
+export const HOTELS_CACHE_TAG = "hotels";
+
+export const getApprovedHotelsCached = unstable_cache(
+  async (): Promise<ExploreHotel[]> => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("hotels")
+      .select(`id, name, location, ..., rooms (price), reviews (rating),
+               hotel_photos (url, category, sort_order)`)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  ["approved-hotels-explore"],                 // cache key
+  { tags: [HOTELS_CACHE_TAG], revalidate: 3600 }, // tag + 1 hour fallback
+);
+\end{lstlisting}
+
+\textbf{(b) Tag invalidation.} When an admin approves a hotel, or a manager
+edits one, we call \texttt{revalidateTag("hotels")} (see
+\file{app/actions/hotels.ts} and \file{app/api/clear-cache/route.ts}). Every
+cached query carrying that tag is thrown away instantly. So the cache is one
+hour \emph{or until something actually changes}, whichever comes first.
+
+\textbf{(c) ISR on the page itself.} \file{app/hotels/[id]/page.tsx} exports
+\texttt{revalidate = 60}. The rendered HTML is stored on Vercel's CDN and
+regenerated at most once a minute.
+
+\saythis{The hotel page is cached at two levels: the database query result is
+cached under a tag, and the rendered HTML is cached on the CDN for 60 seconds.
+When an admin approves a listing we call \texttt{revalidateTag}, which
+invalidates the query cache immediately rather than waiting for the timer. So
+the site is fast \emph{and} correct.}
+
+\subsection{\file{proxy.ts}: the gate in front of everything}
+
+\begin{lstlisting}[language=TS,caption={proxy.ts}]
+export async function proxy(request: NextRequest) {
+  return updateSession(request);
+}
+
+export const config = {
+  // Only run on the protected route groups. Public pages skip middleware
+  // entirely -- no auth round trip. API routes authenticate themselves.
+  matcher: ["/dashboard/:path*", "/manager/:path*", "/admin/:path*"],
+};
+\end{lstlisting}
+
+The \texttt{matcher} is a deliberate performance decision. Middleware runs
+before \emph{every} matching request, so if we matched \texttt{/} and
+\texttt{/hotels} too, every anonymous visitor to the home page would pay for an
+auth check they do not need. We match only the three private areas.
+
+The real logic lives in \file{lib/supabase/middleware.ts}:
+
+\begin{lstlisting}[language=TS,caption={lib/supabase/middleware.ts --- the access-control cascade}]
+const isGuestArea   = path.startsWith("/dashboard");
+const isManagerArea = path.startsWith("/manager");
+const isAdminArea   = path.startsWith("/admin");
+const isProtected   = isGuestArea || isManagerArea || isAdminArea;
+
+// getClaims() verifies the JWT locally -- no round trip to the Auth server.
+const { data: claims } = await supabase.auth.getClaims();
+const userId = claims?.claims?.sub ?? null;
+
+if (!userId) {
+  if (isProtected) return redirect("/login?redirect=" + path);
+  return response;                       // public page: cost nothing
+}
+if (!isProtected) return response;
+
+// Role + (for managers) verification status, fetched IN PARALLEL.
+const [{ data: profile }, { data: mv }] = await Promise.all([
+  supabase.from("profiles").select("role, suspended").eq("id", userId).single(),
+  isManagerArea
+    ? supabase.from("manager_verifications").select("status")
+        .eq("user_id", userId).order("created_at", { ascending: false })
+        .limit(1).maybeSingle()
+    : Promise.resolve({ data: null }),
+]);
+
+if (profile?.suspended)                        return redirectTo("/", "?suspended=1");
+if (isAdminArea   && role !== "admin")         return redirectTo("/");
+if (isGuestArea   && role !== "guest")         return redirectTo("/");
+if (isManagerArea && role !== "manager" && role !== "staff") return redirectTo("/");
+
+// Managers (not staff) are gated behind admin approval.
+if (isManagerArea && role === "manager") {
+  const onWaiting = path.startsWith("/manager/waiting");
+  if (mv?.status !== "approved" && !onWaiting) return redirectTo("/manager/waiting");
+  if (mv?.status === "approved" && onWaiting)  return redirectTo("/manager/hotels");
+}
+\end{lstlisting}
+
+Three things to point out if asked:
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \texttt{getClaims()} not \texttt{getUser()}. \texttt{getUser()} makes a
+        network call to Supabase's auth server on \emph{every request}.
+        \texttt{getClaims()} verifies the JWT signature locally using the
+        project's public signing key. Same guarantee, no round trip.
+  \item The two queries run inside \texttt{Promise.all}, not one after the other.
+  \item Suspension is checked before role, so a suspended admin is still locked out.
+\end{enumerate}
+
+\begin{warnbox}
+\textbf{Middleware is a convenience, not the security boundary.} If middleware
+were the only protection, someone could hit \texttt{/api/admin/users} directly
+and bypass it (\texttt{/api} is not in the matcher). That is fine, because every
+admin API route independently calls \texttt{getAdminContext()}, \emph{and} RLS
+would refuse the query anyway. Middleware exists to give users a nice redirect,
+not to keep attackers out.
+\end{warnbox}
+
+\subsection{The complete file map}
+
+\begin{lstlisting}
+HMS-and-booking/
+|
+|-- proxy.ts .................. Auth/role gate. Runs before /dashboard, /manager, /admin
+|-- next.config.ts ........... Image host allowlist
+|-- app/
+|   |-- layout.tsx ........... Root layout: fonts, AuthProvider, CurrencyProvider, Navbar
+|   |-- page.tsx ............. Landing page
+|   |-- globals.css .......... Tailwind + design tokens (brand colours)
+|   |
+|   |-- hotels/
+|   |   |-- page.tsx ......... Server: fetches approved hotels (cached)
+|   |   |-- HotelsClient.tsx . Client: filters, grid/map toggle
+|   |   |-- ExploreMap.tsx ... Client: MapLibre pins
+|   |   |-- loading.tsx ...... Skeleton shown while page.tsx fetches
+|   |   `-- [id]/
+|   |       |-- page.tsx ..... Server: getPublicHotel(), ISR revalidate=60
+|   |       |-- components/ .. GalleryModal, BookingWidget, ReviewsSection, ...
+|   |       `-- book/page.tsx  The booking flow
+|   |
+|   |-- bookings/[id]/
+|   |   |-- page.tsx ......... Booking detail + generates the check-in QR (server-side)
+|   |   |-- check-in/ ........ Guest-facing QR display
+|   |   `-- review/ .......... Leave a review after checkout
+|   |
+|   |-- messages/ ............ Guest inbox      (+ actions.ts: server actions)
+|   |-- dashboard/ ........... Guest bookings   (role=guest only)
+|   |
+|   |-- manager/
+|   |   |-- layout.tsx ....... Sidebar shell (ManagerShell)
+|   |   |-- create-hotel/ .... 9-step listing wizard (steps/Step1..Step9)
+|   |   |-- manage/[hotelId]/  FrontDesk: QR scanner, check-in/out, walk-in bookings
+|   |   |-- staff/ ........... Invite + permission management
+|   |   `-- waiting/ ......... Shown until an admin approves the manager
+|   |
+|   |-- admin/ ............... Dashboard, verifications, listings, users
+|   |
+|   |-- auth/callback/route.ts  OAuth + email-confirmation landing; routes by role
+|   |
+|   `-- api/                    <-- every server endpoint
+|       |-- bookings/ ........ GET list, POST create
+|       |-- availability/ .... GET rooms free for a date range
+|       |-- payments/razorpay/{order,verify,reconcile}
+|       |-- webhooks/razorpay/  Razorpay calls THIS (server-authoritative)
+|       |-- manager/{hotels,manage,staff}
+|       |-- admin/{overview,users,listings,verifications}
+|       `-- messages/{attachment,unread-count,...}
+|
+|-- lib/
+|   |-- supabase/
+|   |   |-- client.ts ........ Browser client   (anon key, cookies)
+|   |   |-- server.ts ........ Server client    (anon key, request cookies)
+|   |   |-- public.ts ........ Cookie-free client (safe inside unstable_cache)
+|   |   |-- admin.ts ......... SERVICE ROLE - bypasses RLS. Webhooks only.
+|   |   `-- middleware.ts .... The role cascade used by proxy.ts
+|   |-- booking.ts ........... Price math, refund policy, date helpers
+|   |-- razorpay.ts .......... Server SDK instance (holds the secret)
+|   |-- razorpayCheckout.ts .. Browser: order -> checkout modal -> verify
+|   |-- reconcile.ts ......... Safety net: ask Razorpay "was this actually paid?"
+|   |-- email.ts ............. Brevo API + branded HTML layout
+|   |-- emails/*.ts .......... One file per transactional email
+|   |-- hotels.ts ............ Cached hotel queries + listing assembly
+|   |-- compression.ts ....... Canvas-based client-side image compression
+|   |-- auth.ts / authServer.ts
+|   `-- types.ts ............. Every shared TypeScript type
+|
+|-- components/ .............. Shared UI (Navbar, AuthProvider, DatePicker, ...)
+|   |-- messaging/ ........... ChatThread, Composer, useConversationMessages
+|   |-- manager/ ............. ManagerShell, Panel
+|   `-- admin/ ............... AdminShell
+|
+`-- supabase/ ................ 16 .sql migration files -- the real source of truth
+\end{lstlisting}
+
+\newpage
+%==============================================================================
+\section{Supabase: How the Database Is Implemented}
+
+\subsection{What Supabase actually is}
+
+Supabase is \textbf{a PostgreSQL database} with four services bolted on:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \textbf{Auth} --- user accounts, passwords, Google OAuth, JWTs.
+  \item \textbf{PostgREST} --- automatically turns every table into a REST API.
+  \item \textbf{Storage} --- an S3-like file store, with permissions.
+  \item \textbf{Realtime} --- streams Postgres changes over WebSockets.
+\end{itemize}
+
+\begin{notebox}
+\textbf{The idea that makes Supabase different.} Because the database is exposed
+directly to the browser through PostgREST, the browser holds a real database
+API key (the ``anon key''). That sounds terrifying until you understand
+\textbf{Row Level Security}: the database is told, per table, exactly which rows
+each user may see. The anon key gets you \emph{to} the database; RLS decides what
+you get \emph{out of} it. The key is public by design.
+\end{notebox}
+
+\subsection{Why there are four Supabase clients}
+\label{sec:fourclients}
+
+This is a question you will almost certainly be asked, because it looks like
+duplication. It is not. Each client exists because of a different constraint.
+
+\begin{longtable}{@{}p{2.8cm}p{2.1cm}p{9.6cm}@{}}
+\toprule
+\textbf{File} & \textbf{Key} & \textbf{Why it exists} \\
+\midrule
+\endhead
+\file{client.ts} & anon & Runs in the browser. Reads and writes the auth cookie
+so the session survives a refresh. \\
+\addlinespace
+\file{server.ts} & anon & Runs in Server Components, Route Handlers and Server
+Actions. Reads the \emph{current request's} cookies via \texttt{cookies()}, so
+queries run as the logged-in user and RLS applies to them. \\
+\addlinespace
+\file{public.ts} & anon & Stateless, \emph{cookie-free}. Needed because
+\texttt{unstable\_cache} forbids touching request-bound data like cookies --- a
+cached value must not depend on who asked for it. RLS still applies (anon can
+only read approved hotels). \\
+\addlinespace
+\file{admin.ts} & \textbf{service role} & \textbf{Bypasses RLS entirely.} Used in
+exactly one situation: the Razorpay webhook, where there is no logged-in user
+because Razorpay's server is the caller. The service-role key is server-only and
+never reaches the browser. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[language=TS,caption={lib/supabase/public.ts --- read the comment; it is the whole justification}]
+// Stateless, cookie-free Supabase client using the public anon key. RLS still
+// applies (anon can only read approved hotels and other public rows). Safe to
+// use inside `unstable_cache`, which must not touch request-bound data like
+// cookies -- unlike the SSR `server.ts` client.
+export function createPublicClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
+\end{lstlisting}
+
+\saythis{Four clients, four reasons. The browser one manages cookies. The server
+one reads the request's cookies so RLS knows who you are. The public one is
+cookie-free because Next.js caching forbids request-scoped data inside a cached
+function. And the admin one uses the service-role key to bypass RLS --- we use it
+in exactly one place, the Razorpay webhook, because there is no user session
+when a payment gateway calls us.}
+
+\subsection{Row Level Security, properly explained}
+
+Normally, an application checks permissions:
+\emph{``is this user allowed to see this booking? ok, run the query.''}
+If you forget that check in one endpoint, the data leaks.
+
+RLS inverts it. You attach a rule to the \emph{table}, and Postgres appends it to
+every single query, forever, no matter who is asking or from where.
+
+\begin{lstlisting}[language=SQL,caption={supabase/booking\_schema.sql}]
+alter table public.bookings enable row level security;
+
+create policy "bookings: read own"
+  on public.bookings for select using (auth.uid() = guest_id);
+
+create policy "bookings: read manager"
+  on public.bookings for select
+  using (exists (
+    select 1 from public.hotels h
+    where h.id = hotel_id and h.manager_id = auth.uid()
+  ));
+
+create policy "bookings: read admin"
+  on public.bookings for select using (public.get_my_role() = 'admin');
+\end{lstlisting}
+
+Now \texttt{select * from bookings} returns:
+your own bookings if you are a guest;
+your hotels' bookings if you are a manager;
+everything if you are an admin;
+and \textbf{nothing} if you are a stranger --- even with a valid API key.
+Multiple \texttt{SELECT} policies are OR-ed together.
+
+\texttt{auth.uid()} is a Postgres function Supabase provides. It reads the user's
+ID out of the JWT attached to the request.
+
+\subsection{The RLS recursion problem (and how we solved it)}
+
+This is a genuinely hard problem we hit, and explaining it will impress anyone.
+
+Consider: the policy on \texttt{hotels} needs to check ``is the caller assigned
+staff on this hotel?'', which requires reading \texttt{hotel\_staff}. But the
+policy on \texttt{hotel\_staff} needs to check ``does the caller own this
+hotel?'', which requires reading \texttt{hotels}. Each table's policy queries the
+other table --- whose policy queries the first table. Postgres detects the loop
+and throws \texttt{infinite recursion detected in policy}.
+
+\textbf{The fix} is \texttt{SECURITY DEFINER}. A function declared
+\texttt{SECURITY DEFINER} runs with the privileges of the user who \emph{created}
+it (the database owner), not the user calling it --- so RLS does not apply to the
+queries \emph{inside} it. It reads one table, cleanly, and returns a boolean.
+
+\begin{lstlisting}[language=SQL,caption={supabase/hms\_management\_migration.sql}]
+-- Single-table definer helpers used inside RLS policies to AVOID the mutual
+-- recursion hotels <-> hotel_staff. These bypass RLS internally.
+
+create or replace function public.owns_hotel(p_hotel_id uuid)
+returns boolean language sql stable
+security definer set search_path = public
+as $$ select exists (select 1 from public.hotels h
+                     where h.id = p_hotel_id and h.manager_id = auth.uid()); $$;
+
+-- True if the caller is the hotel's manager OR staff holding `p_perm`.
+create or replace function public.can_manage_hotel(p_hotel_id uuid, p_perm text)
+returns boolean language sql stable
+security definer set search_path = public
+as $$
+  select
+    exists (select 1 from public.hotels h
+            where h.id = p_hotel_id and h.manager_id = auth.uid())
+    or exists (select 1 from public.hotel_staff s
+               where s.hotel_id = p_hotel_id and s.staff_id = auth.uid()
+                 and p_perm = any (s.permissions));
+$$;
+\end{lstlisting}
+
+\begin{warnbox}
+\textbf{Why \texttt{set search\_path = public}?} A \texttt{SECURITY DEFINER}
+function runs as a privileged user. If an attacker could change the schema search
+path, they could make the function call \emph{their} malicious
+\texttt{public.hotels} instead of ours. Pinning \texttt{search\_path} closes that
+hole. Every definer function in this project pins it. This is the single most
+commonly forgotten line in Postgres security, and we did not forget it.
+\end{warnbox}
+
+The same technique is used in messaging:
+\texttt{can\_access\_conversation()} and \texttt{validate\_message\_sender()}
+exist purely so the \texttt{messages} policies never have to query
+\texttt{conversations} under RLS.
+
+\subsection{The trigger that creates every profile}
+
+Supabase stores users in \texttt{auth.users}, a schema we do not control. We need
+our own \texttt{public.profiles} row for each of them (holding the role). We do
+this with a trigger, so it is impossible for a user to exist without a profile.
+
+\begin{lstlisting}[language=SQL,caption={supabase/schema.sql}]
+create or replace function public.handle_new_user()
+returns trigger language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, role, full_name, phone, dob, location)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'role', 'guest'),  -- default: guest
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'phone',
+    nullif(new.raw_user_meta_data ->> 'dob', '')::date,
+    new.raw_user_meta_data ->> 'location'
+  )
+  on conflict (id) do nothing;
+
+  -- Managers additionally get a pending verification row, automatically.
+  if coalesce(new.raw_user_meta_data ->> 'role', 'guest') = 'manager' then
+    insert into public.manager_verifications (
+      user_id, business_name, registration_number, business_address,
+      document_url, status)
+    values (new.id,
+      new.raw_user_meta_data ->> 'business_name',
+      new.raw_user_meta_data ->> 'registration_number',
+      new.raw_user_meta_data ->> 'business_address',
+      new.raw_user_meta_data ->> 'document_url',
+      'pending');
+  end if;
+  return new;
+end; $$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+\end{lstlisting}
+
+\texttt{raw\_user\_meta\_data} is the JSON blob we passed in the
+\texttt{options.data} of \texttt{supabase.auth.signUp()}. So the client says
+``I am signing up as a manager, here is my business name'', and the database
+turns that into a profile \emph{plus} a pending verification request --- in one
+transaction, before the user has even confirmed their email.
+
+\saythis{We never insert a profile from application code. A Postgres trigger on
+\texttt{auth.users} does it, reading the sign-up metadata. That means a user row
+without a matching profile row is structurally impossible --- there is no code
+path that can forget.}
+
+\subsection{Why so much logic lives in the database (RPC functions)}
+
+A large amount of this project's business logic is written in PL/pgSQL and called
+via \texttt{supabase.rpc("function\_name", \{...\})}. That is a deliberate
+architectural choice, and here is the reasoning.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Atomicity.} \texttt{book\_room} reserves inventory for every night
+        \emph{and} writes the booking \emph{and} writes the payment row. If any
+        step fails, Postgres rolls the whole thing back. Doing this from
+        JavaScript across three separate HTTP calls would leave orphaned data
+        the moment the network hiccups.
+  \item \textbf{Concurrency.} Only the database can take a row lock. See
+        Section~\ref{sec:concurrency}.
+  \item \textbf{Trust.} The price is computed in SQL from the room's real price.
+        A malicious client that POSTs \texttt{\{"total": 1\}} is ignored --- the
+        server never reads a price from the request body.
+  \item \textbf{One place to change.} Both the web app and the webhook confirm
+        payments. They both call the same function.
+\end{enumerate}
+
+\subsection{The complete table catalogue}
+
+\begin{longtable}{@{}p{3.5cm}p{11.3cm}@{}}
+\toprule
+\textbf{Table} & \textbf{Purpose and key columns} \\
+\midrule
+\endhead
+\texttt{profiles} & One row per auth user. Holds \texttt{role}
+(guest / manager / staff / admin), name, phone, \texttt{suspended}. \\
+\addlinespace
+\texttt{manager\_verifications} & A manager's business documents and approval
+\texttt{status} (pending / approved / rejected / more\_info). \\
+\addlinespace
+\texttt{hotels} & The listing. \texttt{status} gates visibility
+(draft $\to$ pending $\to$ approved). Also holds lat/lng, amenities array,
+policies, \texttt{gst\_percent}, \texttt{deleted\_at} (soft delete). \\
+\addlinespace
+\texttt{rooms} & A room \emph{type} (not a physical room). \texttt{price},
+\texttt{capacity}, \texttt{total\_units} = how many of this type exist. \\
+\addlinespace
+\texttt{room\_inventory} & \textbf{The heart of availability.} One row per
+(room type, date), holding \texttt{total\_count} and \texttt{booked\_count},
+with a CHECK constraint that booked never exceeds total. \\
+\addlinespace
+\texttt{bookings} & \texttt{status} in pending / confirmed / checked\_in /
+completed / cancelled. Snapshots the price at booking time. \texttt{guest\_id}
+is nullable to support walk-in bookings. \\
+\addlinespace
+\texttt{payments} & One per booking. \texttt{order\_id} (Razorpay order),
+\texttt{transaction\_id} (Razorpay payment id), \texttt{status}. \\
+\addlinespace
+\texttt{conversations} & One per (hotel, guest) pair --- enforced by a UNIQUE
+constraint. Holds \texttt{guest\_unread}, \texttt{host\_unread}, and a preview
+of the last message. \\
+\addlinespace
+\texttt{messages} & \texttt{body}, \texttt{attachments} (jsonb array),
+\texttt{sender\_role}. \\
+\addlinespace
+\texttt{hotel\_staff} & Assignment of a staff account to one hotel, with a
+\texttt{permissions text[]} array. \\
+\addlinespace
+\texttt{staff\_invites} & Pending email invitations, with a random
+\texttt{token} and a 14-day \texttt{expires\_at}. \\
+\addlinespace
+\texttt{reviews} & rating 1--5 + comment. \\
+\addlinespace
+\texttt{hotel\_photos}, \texttt{room\_photos} & Ordered image URLs. \\
+\addlinespace
+\texttt{admin\_audit\_log} & Every admin action, with a jsonb \texttt{details}
+blob. Append-only; admins can read but the app never deletes. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Database functions, at a glance}
+
+\begin{longtable}{@{}p{5.2cm}p{9.6cm}@{}}
+\toprule
+\textbf{Function} & \textbf{What it does} \\
+\midrule
+\endhead
+\texttt{get\_my\_role()} & Returns the caller's role without tripping RLS
+recursion on \texttt{profiles}. Used inside dozens of policies. \\
+\addlinespace
+\texttt{handle\_new\_user()} & Trigger. Creates the profile on signup. \\
+\addlinespace
+\texttt{room\_availability(hotel, in, out)} & Returns each room type with the
+number of units free for the \emph{whole} range. \\
+\addlinespace
+\texttt{book\_room(...)} & Atomically reserves inventory, creates the booking and
+the pending payment. Returns the booking id. \\
+\addlinespace
+\texttt{book\_offline(...)} & Same, for a walk-in guest with no account. \\
+\addlinespace
+\texttt{attach\_payment\_order(booking, order)} & Stores the Razorpay order id. \\
+\addlinespace
+\texttt{confirm\_razorpay\_payment(...)} & Marks payment completed + booking
+confirmed. Only after the server has verified the signature. \\
+\addlinespace
+\texttt{cancel\_booking(booking, reason)} & Releases inventory night by night and
+computes the refund from the time-based policy. \\
+\addlinespace
+\texttt{check\_in\_booking(id)} / \texttt{check\_out\_booking(id)} & Front-desk
+state transitions, guarded by \texttt{can\_operate\_hotel()}. \\
+\addlinespace
+\texttt{can\_manage\_hotel(hotel, perm)} & Manager OR staff-with-permission. \\
+\addlinespace
+\texttt{can\_operate\_hotel(hotel)} & Manager OR any assigned staff. \\
+\addlinespace
+\texttt{shares\_conversation\_with(profile)} & Powers the privacy rule that lets
+a host read a guest's profile only when a conversation exists. \\
+\addlinespace
+\texttt{get\_hotel\_reviews(hotel)} & Joins reviews to profiles internally and
+returns \emph{only} safe fields (name, join date) --- never phone or email. \\
+\addlinespace
+\texttt{admin\_review\_hotel(...)}, \texttt{admin\_review\_manager(...)},
+\texttt{admin\_set\_user\_role(...)}, \texttt{admin\_set\_user\_suspended(...)}
+& Every one begins with
+\texttt{if get\_my\_role() <> 'admin' then raise exception} and ends by writing
+to \texttt{admin\_audit\_log}. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Storage buckets}
+
+\begin{longtable}{@{}p{4.2cm}p{2.0cm}p{8.6cm}@{}}
+\toprule
+\textbf{Bucket} & \textbf{Public?} & \textbf{Policy} \\
+\midrule
+\endhead
+\texttt{manager-documents} & No & Insert allowed anonymously (the upload happens
+\emph{during} signup, before a session exists); read restricted to admins. \\
+\addlinespace
+\texttt{hotel-images} & Yes & Anyone reads; authenticated users write. \\
+\addlinespace
+\texttt{message-attachments} & No & Made private in a later migration. Reads go
+through a signed-URL endpoint that checks conversation membership. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Performance: the indexes that matter}
+
+\begin{lstlisting}[language=SQL,caption={supabase/perf\_migration.sql}]
+-- Trigram matching lets `ILIKE '%term%'` (leading-wildcard) use an index
+-- instead of scanning every row. Required for instant text search.
+create extension if not exists pg_trgm;
+
+create index if not exists hotels_location_trgm_idx
+  on public.hotels using gin (location gin_trgm_ops);
+create index if not exists hotels_name_trgm_idx
+  on public.hotels using gin (name gin_trgm_ops);
+
+-- The catalog query is: status = 'approved' ORDER BY created_at DESC.
+-- A partial index over ONLY approved rows serves the filter and the sort
+-- with no extra sort step.
+create index if not exists hotels_approved_created_idx
+  on public.hotels (created_at desc)
+  where status = 'approved';
+\end{lstlisting}
+
+\saythis{Searching for ``goa'' means \texttt{ILIKE '\%goa\%'}, and a normal B-tree
+index cannot help with a leading wildcard --- Postgres would scan every hotel. So
+we enabled the \texttt{pg\_trgm} extension and built GIN trigram indexes, which
+index every three-character substring. And because the catalogue query always
+filters on \texttt{status = 'approved'}, we used a \emph{partial} index --- it only
+contains approved rows, so it is smaller and it satisfies the sort as well as the
+filter.}
+
+\newpage
+%==============================================================================
+\section{Authentication}
+
+\subsection{The three sign-up paths}
+
+\subsubsection{Guest, with email and password}
+
+\begin{lstlisting}[language=TS,caption={lib/auth.ts}]
+export async function signUpGuest(input: GuestSignupInput) {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: input.email,
+    password: input.password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback`,
+      data: {                         // -> becomes raw_user_meta_data
+        role: "guest",
+        full_name: input.fullName,
+        dob: input.dob,
+        phone: input.phone,
+        location: input.location,
+      },
+    },
+  });
+  if (error) throw error;
+  return data;
+}
+\end{lstlisting}
+
+We never write to \texttt{profiles} here. We hand the data to Supabase Auth, and
+the \texttt{handle\_new\_user} trigger creates the profile. This works even
+before the user confirms their email.
+
+\subsubsection{Manager, with a verification document}
+
+The document must be uploaded \emph{before} \texttt{signUp()} returns, because
+the trigger needs its path in the metadata. This is why the
+\texttt{manager-documents} bucket permits anonymous inserts.
+
+\begin{lstlisting}[language=TS,caption={lib/auth.ts}]
+const path = `pending/${crypto.randomUUID()}.${ext}`;
+await supabase.storage.from("manager-documents").upload(path, input.document);
+
+await supabase.auth.signUp({
+  email: input.email, password: input.password,
+  options: { data: { role: "manager", business_name: ..., document_url: path } },
+});
+\end{lstlisting}
+
+\subsubsection{Google OAuth}
+
+\begin{lstlisting}[language=TS,caption={lib/auth.ts --- note the origin trick}]
+export async function signInWithGoogle() {
+  const supabase = createClient();
+  // Always runs in the browser (click handler), so prefer the live origin.
+  // This keeps localhost, Vercel previews, and production each redirecting
+  // back to themselves rather than a single hard-coded site URL.
+  const origin = typeof window !== "undefined" ? window.location.origin : siteUrl;
+  return supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${origin}/auth/callback` },
+  });
+}
+\end{lstlisting}
+
+Google only gives us an email and a name. It gives us no phone number and no date
+of birth. So the trigger creates a profile with those fields null, and
+\file{app/auth/callback/route.ts} notices and sends the user to
+\texttt{/onboarding} to fill them in.
+
+\subsection{The callback route: one door, four destinations}
+
+\begin{lstlisting}[language=TS,caption={app/auth/callback/route.ts}]
+export async function GET(request: Request) {
+  const code = searchParams.get("code");
+  if (!code) return NextResponse.redirect(`${origin}/login?error=missing_code`);
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+
+  const { data: profile } = await supabase
+    .from("profiles").select("role, phone").eq("id", user.id).single();
+  const role = profile?.role ?? "guest";
+
+  if (role === "admin")   return redirect(`${origin}/admin/dashboard`);
+
+  if (role === "manager") {                       // approved? -> dashboard
+    const { data: mv } = await supabase           // else      -> waiting room
+      .from("manager_verifications").select("status")
+      .eq("user_id", user.id).order("created_at", { ascending: false })
+      .limit(1).maybeSingle();
+    return redirect(`${origin}${mv?.status === "approved"
+      ? "/manager/dashboard" : "/manager/waiting"}`);
+  }
+
+  // Guest. OAuth sign-ups land here with no phone -> finish the profile first.
+  if (!profile?.phone) return redirect(`${origin}/onboarding`);
+  return redirect(`${origin}/`);
+}
+\end{lstlisting}
+
+Both the email-confirmation link and the Google redirect land here. The
+\texttt{code} is a one-time authorisation code; \texttt{exchangeCodeForSession}
+swaps it for a session cookie. This is the PKCE flow, and Supabase implements it
+for us.
+
+\subsection{\texttt{getUser} vs \texttt{getClaims} vs \texttt{getSession}}
+
+We use all three, in different places, on purpose. If you can explain this, you
+understand the auth system better than most working developers.
+
+\begin{longtable}{@{}p{2.6cm}p{4.4cm}p{7.8cm}@{}}
+\toprule
+\textbf{Call} & \textbf{Cost} & \textbf{Where we use it, and why} \\
+\midrule
+\endhead
+\texttt{getSession()} & Free (reads local storage) & \file{components/AuthProvider.tsx}.
+It is only driving UI state (``show the avatar''). It can be trusted for
+cosmetics, never for authorisation. \\
+\addlinespace
+\texttt{getClaims()} & Cheap (verifies the JWT signature locally) &
+\file{lib/supabase/middleware.ts} and \file{lib/authServer.ts}. We only need the
+user id, and a forged token fails signature verification. \\
+\addlinespace
+\texttt{getUser()} & Expensive (network call to Supabase Auth) &
+Route Handlers that write --- \file{api/bookings}, \file{api/payments/*}. Here we
+want the strongest possible guarantee before touching money. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[language=TS,caption={components/AuthProvider.tsx --- the comment explains the trade-off}]
+// getSession() reads the token from local storage (instant, no network
+// round-trip), unlike getUser() which validates against Supabase's servers
+// on every page. For client-side UI state this is the recommended call;
+// anything security-sensitive is enforced server-side / by RLS anyway.
+const { data: { session } } = await supabase.auth.getSession();
+\end{lstlisting}
+
+\saythis{\texttt{getSession} just reads the token from local storage --- fast, but a
+user could edit local storage, so we only use it to decide what to \emph{draw}.
+\texttt{getClaims} cryptographically verifies the token's signature locally, which
+is enough to trust the user id without a network call --- that is what middleware
+uses. \texttt{getUser} actually asks Supabase's server, and we save it for the
+routes that create bookings and payments.}
+
+\subsection{How the session survives}
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Supabase issues a short-lived JWT (access token) and a refresh token.
+  \item \texttt{@supabase/ssr} stores them in \textbf{cookies}, not just local
+        storage, so the \emph{server} can read them too.
+  \item On a protected route, \file{proxy.ts} runs, and the act of constructing
+        the server client refreshes the token if needed and writes the new cookie
+        onto the response.
+  \item On public routes we skip middleware entirely --- the browser client
+        refreshes its own token in the background.
+\end{enumerate}
+
+That fourth point is why the \texttt{matcher} in \file{proxy.ts} is safe to
+restrict.
+
+\newpage
+%==============================================================================
+\section{The Booking System}
+
+\subsection{The model: room \emph{types}, not room numbers}
+
+We do not store ``Room 302''. We store a room \emph{type} --- ``Deluxe Suite'' ---
+with a \texttt{total\_units} count of how many exist. Availability is therefore a
+counting problem, not an assignment problem.
+
+\begin{notebox}
+\textbf{Why?} Because guests do not book Room 302; they book ``a deluxe room''.
+The hotel assigns the physical room at check-in. Modelling it as a count is both
+simpler and closer to how hotels actually operate. It also means the front desk
+does not have to maintain a floor plan in our system.
+\end{notebox}
+
+\subsection{\texttt{room\_inventory}: one row per room type per night}
+
+\begin{lstlisting}[language=SQL]
+create table public.room_inventory (
+  id           uuid primary key default gen_random_uuid(),
+  room_id      uuid not null references public.rooms (id) on delete cascade,
+  date         date not null,
+  total_count  int not null,
+  booked_count int not null default 0,
+  unique (room_id, date),
+  constraint inventory_not_overbooked check (booked_count <= total_count)
+);
+\end{lstlisting}
+
+Two details worth pointing at:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \texttt{unique (room\_id, date)} --- there can only ever be one inventory
+        row per night. This is what makes the lock in \texttt{book\_room} work.
+  \item \texttt{check (booked\_count <= total\_count)} --- a database-level
+        guarantee that overbooking is \emph{impossible}, even if every line of
+        application code were wrong.
+\end{itemize}
+
+Rows are created \textbf{lazily}. A hotel with 20 room types open for two years
+would otherwise need 14,600 rows on day one. Instead the row for a given night
+springs into existence the first time somebody books that night.
+
+\subsection{Checking availability}
+
+\begin{lstlisting}[language=SQL,caption={supabase/booking\_schema.sql}]
+-- A room is bookable for the whole range only if it has stock on EVERY night,
+-- so availability = total_units - max(booked nights in range).
+create or replace function public.room_availability(
+  p_hotel_id uuid, p_check_in date, p_check_out date)
+returns table (room_id uuid, name text, price numeric,
+               capacity int, amenities text[], available int)
+language sql stable security definer set search_path = public
+as $$
+  select r.id, r.name, r.price, r.capacity, r.amenities,
+    r.total_units - coalesce((
+      select max(i.booked_count)
+      from public.room_inventory i
+      where i.room_id = r.id
+        and i.date >= p_check_in
+        and i.date <  p_check_out       -- note: check-out night is NOT occupied
+    ), 0) as available
+  from public.rooms r
+  where r.hotel_id = p_hotel_id
+  order by r.price asc;
+$$;
+\end{lstlisting}
+
+The clever bit is \texttt{max(booked\_count)}. If a guest wants three nights and
+the room is fully booked on the middle night, they cannot have the range at all.
+Taking the maximum booked count across the range gives exactly the number of
+units free for the \emph{entire} stay.
+
+\texttt{i.date < p\_check\_out} (not \texttt{<=}) encodes the fact that you do not
+occupy a room on the night of your check-out day.
+
+\subsection{Creating the booking, atomically}
+\label{sec:concurrency}
+
+\textbf{This is the most important 30 lines in the project.} Learn them.
+
+\begin{lstlisting}[language=SQL,caption={supabase/booking\_schema.sql --- book\_room}]
+create or replace function public.book_room(
+  p_room_id uuid, p_check_in date, p_check_out date,
+  p_guests int, p_num_rooms int, p_special text)
+returns uuid language plpgsql security definer set search_path = public
+as $$
+declare v_room public.rooms; v_hotel public.hotels;
+        v_uid uuid := auth.uid(); v_nights int; v_avail int; d date;
+        v_base numeric; v_gst numeric; v_service_charge numeric;
+        v_fee numeric; v_total numeric; v_id uuid;
+begin
+  if v_uid is null then raise exception 'Not authenticated'; end if;
+  if p_check_out <= p_check_in then raise exception 'Check-out must be after check-in'; end if;
+  if p_check_in < current_date then raise exception 'Check-in cannot be in the past'; end if;
+  if p_num_rooms < 1 then raise exception 'At least one room is required'; end if;
+
+  select * into v_room  from public.rooms  where id = p_room_id;
+  select * into v_hotel from public.hotels where id = v_room.hotel_id;
+  v_nights := p_check_out - p_check_in;
+
+  -- Reserve each night: lazily create the inventory row, LOCK it, then book.
+  d := p_check_in;
+  while d < p_check_out loop
+    insert into public.room_inventory (room_id, date, total_count, booked_count)
+      values (p_room_id, d, v_room.total_units, 0)
+      on conflict (room_id, date) do nothing;         -- (1) idempotent create
+
+    select total_count - booked_count into v_avail
+      from public.room_inventory
+      where room_id = p_room_id and date = d
+      for update;                                     -- (2) THE ROW LOCK
+
+    if v_avail < p_num_rooms then
+      raise exception 'Only % room(s) left on %', v_avail, to_char(d, 'Mon DD');
+    end if;                                           -- (3) rolls back everything
+
+    update public.room_inventory
+      set booked_count = booked_count + p_num_rooms
+      where room_id = p_room_id and date = d;
+
+    d := d + 1;
+  end loop;
+
+  -- Price is computed HERE, from the DB's own numbers. Never from the client.
+  v_base           := v_room.price * p_num_rooms * v_nights;
+  v_gst            := round(v_base * (coalesce(v_hotel.gst_percent, 18.00) / 100.0), 2);
+  v_service_charge := round(v_base * (coalesce(v_hotel.service_charge_percent, 0) / 100.0), 2);
+  v_fee            := round(v_base * 0.02, 2);        -- platform fee
+  v_total          := v_base + v_gst + v_service_charge + v_fee;
+
+  insert into public.bookings (...) values (..., 'pending', p_special)
+    returning id into v_id;
+  insert into public.payments (booking_id, amount, payment_method, status)
+    values (v_id, v_total, 'upi', 'pending');
+
+  return v_id;
+end; $$;
+\end{lstlisting}
+
+\subsubsection{Why \texttt{FOR UPDATE} is the whole ballgame}
+
+Imagine one room left, and two guests click ``Book'' in the same millisecond.
+
+\begin{lstlisting}
+WITHOUT the lock:
+  Alice reads booked_count = 4, total = 5  -> "1 free, ok!"
+  Bob   reads booked_count = 4, total = 5  -> "1 free, ok!"
+  Alice writes booked_count = 5
+  Bob   writes booked_count = 5            <-- Bob overwrote Alice. OVERBOOKED.
+
+WITH `for update`:
+  Alice's SELECT ... FOR UPDATE locks the row for date D.
+  Bob's SELECT ... FOR UPDATE *blocks* -- it waits.
+  Alice writes booked_count = 5, her transaction commits, lock released.
+  Bob's SELECT now returns booked_count = 5 -> v_avail = 0
+  Bob raises 'Only 0 room(s) left on Mar 14' -> his whole transaction ROLLS BACK.
+\end{lstlisting}
+
+And because the entire function is one transaction, when Bob's exception fires on
+night three, the reservations he already made for nights one and two are undone
+automatically. There is no cleanup code, and there cannot be a partial booking.
+
+\saythis{Two people booking the last room at the same instant is a classic race
+condition. We solve it the way a bank does: \texttt{SELECT ... FOR UPDATE} takes a
+row-level lock on each night's inventory row, so the second transaction physically
+waits for the first to commit and then sees the updated count. The whole function
+is one transaction, so if night three is full, nights one and two are rolled back
+automatically. And there is a CHECK constraint as a last line of defence --- even a
+bug could not overbook the hotel.}
+
+\subsection{Why the price is calculated twice}
+
+\file{lib/booking.ts} has \texttt{computeQuote()}, which mirrors the SQL exactly.
+This is not duplication by accident:
+
+\begin{lstlisting}[language=TS,caption={lib/booking.ts}]
+export const GST_RATE = 0.18;
+export const PLATFORM_FEE_RATE = 0.02;
+
+// Mirror of the server-side price math in book_room (kept in sync for preview).
+export function computeQuote(roomPrice, nights, numRooms,
+                             gstPercent = 18, serviceChargePercent = 0): PriceQuote {
+  const base          = round2(roomPrice * nights * numRooms);
+  const gst           = round2(base * (gstPercent / 100));
+  const serviceCharge = round2(base * (serviceChargePercent / 100));
+  const platformFee   = round2(base * PLATFORM_FEE_RATE);
+  const total = round2(base + gst + serviceCharge + platformFee);
+  return { roomPrice, nights, numRooms, base, gst, serviceCharge, platformFee, total };
+}
+\end{lstlisting}
+
+The TypeScript version exists \emph{only} to render the price breakdown while the
+user is choosing dates, with no network call. The number it produces is never
+sent to the server and never trusted. \texttt{book\_room} recomputes from
+\texttt{rooms.price} and \texttt{hotels.gst\_percent}.
+
+\saythis{The client-side calculation is a preview, for instant feedback. The
+authoritative number comes from \texttt{book\_room}, which reads the price out of
+the database. If you tampered with the JavaScript to say the room costs one rupee,
+the booking would still be created for the real amount --- the API never accepts a
+price as input.}
+
+\subsection{Cancellation and the refund policy}
+
+\begin{lstlisting}[language=SQL,caption={supabase/booking\_schema.sql --- cancel\_booking}]
+  v_hours := extract(epoch from (v_b.check_in::timestamp - now())) / 3600;
+  if    v_hours >= 48 then v_pct := 1.0;   -- full refund
+  elsif v_hours >= 24 then v_pct := 0.5;   -- half
+  else                     v_pct := 0.0;   -- none
+  end if;
+  v_refund := round(v_b.total_price * v_pct, 2);
+
+  -- Release the reserved inventory, night by night.
+  d := v_b.check_in;
+  while d < v_b.check_out loop
+    update public.room_inventory
+      set booked_count = greatest(0, booked_count - v_b.num_rooms)
+      where room_id = v_b.room_id and date = d;
+    d := d + 1;
+  end loop;
+\end{lstlisting}
+
+\texttt{greatest(0, ...)} is defensive: even if something else had already
+decremented the count, we can never drive it negative.
+
+There is a mirror of this policy in TypeScript too (\texttt{refundPolicy()} in
+\file{lib/booking.ts}) --- again, display only. The comment in the source says so
+explicitly: \emph{``Refund policy mirror (display only --- server recomputes
+authoritatively).''}
+
+\subsection{Who is allowed to cancel}
+
+\begin{lstlisting}[language=SQL]
+if v_b.guest_id <> auth.uid() and public.get_my_role() <> 'admin' then
+  raise exception 'Not allowed';
+end if;
+\end{lstlisting}
+
+Later, \file{hms\_management\_migration.sql} \emph{redefines} the same function to
+also permit the hotel's manager and staff, so the front desk can cancel a booking
+for a guest who calls the hotel. This is why the same function name appears in two
+migration files --- the later one wins. That is intentional, and it is how
+migrations work: they are applied in order, and each is idempotent
+(\texttt{create or replace}, \texttt{if not exists}).
+
+\newpage
+%==============================================================================
+\section{Payments: Razorpay}
+
+\subsection{Why a gateway at all}
+
+We never see a card number. If we did, we would be legally responsible for PCI-DSS
+compliance. Razorpay's checkout runs on \emph{Razorpay's} domain, inside a modal.
+The card details go from the user's browser straight to Razorpay. Our server only
+ever handles opaque identifiers.
+
+\subsection{The three-step handshake}
+
+\begin{lstlisting}
+BROWSER                      OUR SERVER                    RAZORPAY
+   |                              |                            |
+   |-- POST /api/payments/------->|                            |
+   |     razorpay/order           |-- orders.create(amount) -->|
+   |     { bookingId }            |<---------- order_id -------|
+   |                              |                            |
+   |                              |  attach_payment_order()    |
+   |<---- { orderId, keyId } -----|  (store order_id in DB)    |
+   |                                                           |
+   |------ open checkout.js modal, user pays ----------------->|
+   |<----- { payment_id, order_id, signature } ----------------|
+   |                              |                            |
+   |-- POST /api/payments/------->|                            |
+   |     razorpay/verify          |  HMAC_SHA256(              |
+   |                              |    order_id + "|" + payment_id,
+   |                              |    RAZORPAY_KEY_SECRET )   |
+   |                              |  == signature ?            |
+   |                              |                            |
+   |                              |  confirm_razorpay_payment()|
+   |<-------- { ok: true } -------|  booking -> 'confirmed'    |
+\end{lstlisting}
+
+\subsection{Step 1: creating the order (server)}
+
+\begin{lstlisting}[language=TS,caption={app/api/payments/razorpay/order/route.ts (abridged)}]
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
+// RLS ensures the booking belongs to this user.
+const { data: booking } = await supabase
+  .from("bookings")
+  .select("total_price, base_price, status, hotel_id, hotels (require_advance, ...)")
+  .eq("id", bookingId).maybeSingle();
+
+if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+if (booking.status !== "pending")
+  return NextResponse.json({ error: "This booking is not awaiting payment" }, { status: 400 });
+
+// Prices are stored in INR, so the order amount is simply paise.
+const amountPaise = Math.round(amountToCharge * 100);
+
+const order = await razorpay.orders.create({
+  amount: amountPaise, currency: "INR",
+  receipt: bookingId, notes: { bookingId },
+  ...(transfers ? { transfers } : {}),   // Razorpay Route split, see below
+});
+
+await supabase.rpc("attach_payment_order", {
+  p_booking_id: bookingId, p_order_id: order.id,
+});
+
+return NextResponse.json({
+  orderId: order.id, amount: amountPaise, currency: "INR",
+  keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,   // publishable, safe
+});
+\end{lstlisting}
+
+Three deliberate details:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item The amount comes from \texttt{booking.total\_price} in the database. The
+        request body contains \emph{only} a \texttt{bookingId}.
+  \item ``Booking not found'' is what an attacker sees when they pass someone
+        else's booking id --- because RLS returned zero rows. We did not have to
+        write an ownership check; the database performed it.
+  \item Razorpay works in \textbf{paise}, the smallest currency unit. Rs.~1{,}500
+        is \texttt{150000}. Using integers avoids floating-point money bugs.
+\end{itemize}
+
+\subsection{Step 2: the browser modal}
+
+\begin{lstlisting}[language=TS,caption={lib/razorpayCheckout.ts}]
+const ok = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+const rzp = new window.Razorpay({
+  key: order.keyId, order_id: order.orderId,
+  amount: order.amount, currency: order.currency,
+  name: "BookNest",
+  handler: async (resp: RazorpayResponse) => {         // Razorpay calls this on success
+    const v = await fetch("/api/payments/razorpay/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        bookingId,
+        orderId:   resp.razorpay_order_id,
+        paymentId: resp.razorpay_payment_id,
+        signature: resp.razorpay_signature,
+      }),
+    });
+    if (v.ok) onSuccess(); else onError(...);
+  },
+  modal: { ondismiss: () => onError("Payment was cancelled.") },
+});
+rzp.open();
+\end{lstlisting}
+
+\subsection{Step 3: verifying the signature (server)}
+
+\begin{lstlisting}[language=TS,caption={app/api/payments/razorpay/verify/route.ts}]
+// Signature = HMAC_SHA256(order_id + "|" + payment_id, RAZORPAY_KEY_SECRET)
+const expected = crypto
+  .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+  .update(`${orderId}|${paymentId}`)
+  .digest("hex");
+
+// Timing-safe comparison.
+const valid =
+  expected.length === signature.length &&
+  crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+
+if (!valid)
+  return NextResponse.json({ error: "Payment signature verification failed" }, { status: 400 });
+
+const { error } = await supabase.rpc("confirm_razorpay_payment", {
+  p_booking_id: bookingId, p_order_id: orderId, p_payment_id: paymentId,
+});
+\end{lstlisting}
+
+\begin{notebox}
+\textbf{What is an HMAC, in plain English?} It is a fingerprint of a message,
+made using a secret only two parties know. Razorpay knows our
+\texttt{KEY\_SECRET}. We know our \texttt{KEY\_SECRET}. Nobody else does. So when
+Razorpay sends back a fingerprint of \texttt{order\_id|payment\_id} and we compute
+the same fingerprint and it matches, we know the message really came from Razorpay
+and was not altered. A hacker cannot forge it without the secret.
+\end{notebox}
+
+\begin{notebox}
+\textbf{Why \texttt{timingSafeEqual} and not \texttt{===}?} Because \texttt{===}
+on strings stops comparing at the first mismatched character. An attacker who can
+measure response times very precisely could learn the signature one character at a
+time --- a \emph{timing attack}. \texttt{crypto.timingSafeEqual} always compares
+every byte, so the comparison takes constant time regardless of where the strings
+differ.
+\end{notebox}
+
+\saythis{Anyone can POST to our verify endpoint with a made-up payment id. The
+signature is what makes it trustworthy: it is an HMAC-SHA256 of the order id and
+payment id, keyed with a secret that only Razorpay and our server hold. We
+recompute it and compare in constant time. If it does not match, nothing happens.}
+
+\subsection{Three roads to ``confirmed'' --- and why we need all three}
+
+A payment can succeed while the user's Wi-Fi dies, or their phone battery goes
+flat, or they close the tab. The money left their account. Our database still says
+\texttt{pending}. That is unacceptable, so there are three independent paths:
+
+\begin{longtable}{@{}p{2.5cm}p{4.1cm}p{8.2cm}@{}}
+\toprule
+\textbf{Path} & \textbf{Trigger} & \textbf{Mechanism} \\
+\midrule
+\endhead
+\textbf{Happy} & Razorpay's JS calls our \texttt{handler} &
+\file{api/payments/razorpay/verify} verifies the signature and confirms. \\
+\addlinespace
+\textbf{Webhook} & Razorpay's \emph{server} POSTs to us &
+\file{api/webhooks/razorpay} verifies an HMAC of the raw request body against
+\texttt{RAZORPAY\_WEBHOOK\_SECRET}, then confirms using the service-role client
+(there is no user session). \\
+\addlinespace
+\textbf{Reconcile} & The user re-opens the booking page &
+\file{lib/reconcile.ts} asks Razorpay ``was order X actually paid?'' via
+\texttt{orders.fetchPayments()} and confirms if a captured payment exists. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[language=TS,caption={lib/reconcile.ts --- the webhook-free safety net}]
+export async function reconcilePendingBooking(supabase, bookingId, orderId) {
+  if (!orderId) return false;
+  try {
+    const res = await razorpay.orders.fetchPayments(orderId);
+    const captured = res.items?.find((p) => p.status === "captured");
+    if (!captured) return false;
+
+    const { error } = await supabase.rpc("confirm_razorpay_payment", {
+      p_booking_id: bookingId, p_order_id: orderId, p_payment_id: captured.id,
+    });
+    return !error;
+  } catch { return false; }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=TS,caption={app/api/webhooks/razorpay/route.ts --- signature over the RAW body}]
+const signature = request.headers.get("x-razorpay-signature") ?? "";
+const raw = await request.text();          // must be the raw text, not parsed JSON
+
+const expected = crypto.createHmac("sha256", secret).update(raw).digest("hex");
+const valid = expected.length === signature.length &&
+  crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+if (!valid) return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+
+switch (event.event) {
+  case "payment.captured": {
+    const bookingId = await bookingIdForOrder(payment?.order_id);
+    await supabase.from("payments").update({ status: "completed", ... });
+    await supabase.from("bookings")
+      .update({ status: "confirmed" })
+      .eq("id", bookingId)
+      .eq("status", "pending");            // only promote PENDING bookings
+    await sendBookingConfirmation(bookingId);  // idempotent -- see below
+    break;
+  }
+  ...
+}
+\end{lstlisting}
+
+Notice \texttt{.eq("status", "pending")} on the update. If a booking was already
+cancelled and refunded, a late-arriving webhook must not resurrect it.
+
+\subsection{Idempotency: sending the confirmation email exactly once}
+
+All three paths call \texttt{sendBookingConfirmation()}. Without protection, a
+guest could get three identical emails. The solution is an \textbf{atomic claim}:
+
+\begin{lstlisting}[language=TS,caption={lib/emails/bookingConfirmation.ts}]
+// Atomic claim: only confirmed bookings that haven't been emailed yet.
+const { data: booking } = await admin
+  .from("bookings")
+  .update({ confirmation_email_sent_at: new Date().toISOString() })
+  .eq("id", bookingId)
+  .eq("status", "confirmed")
+  .is("confirmation_email_sent_at", null)     // <-- the claim
+  .select("id, guest_id, ...")
+  .maybeSingle();
+
+if (!booking) return;   // already sent, or not confirmed yet
+\end{lstlisting}
+
+The \texttt{UPDATE ... WHERE confirmation\_email\_sent\_at IS NULL} is a single
+atomic statement. Exactly one caller can win it; every other caller gets zero rows
+back and returns early. This is a compare-and-swap, expressed in SQL.
+
+\saythis{Three different code paths can confirm a booking, so all three might try
+to email the guest. We make the email idempotent with an atomic claim: a single
+UPDATE that stamps a timestamp only if it is still null. Postgres guarantees one
+winner. The losers get zero rows and quietly return.}
+
+\subsection{Razorpay Route: splitting the money}
+
+If a hotel manager has linked a Razorpay account, the order carries a
+\texttt{transfers} array. Razorpay then automatically settles the manager's share
+straight to them, and keeps our commission in our account.
+
+\begin{lstlisting}[language=TS,caption={app/api/payments/razorpay/order/route.ts}]
+const { data: payoutAccount } = await supabase.rpc("hotel_payout_account",
+  { p_hotel_id: booking.hotel_id });
+
+if (payoutAccount) {
+  const basePaise = Math.round(Number(booking.base_price) * 100);
+  const managerShare = Math.min(
+    Math.round(basePaise * (1 - PLATFORM_COMMISSION_RATE)),  // 15% commission
+    amountPaise,                                             // never exceed the charge
+  );
+  if (managerShare > 0 && managerShare <= amountPaise) {
+    transfers = [{ account: payoutAccount, amount: managerShare,
+                   currency: "INR", notes: { bookingId } }];
+  }
+}
+\end{lstlisting}
+
+The manager's share is computed on \texttt{base\_price} (the room revenue), not
+\texttt{total\_price} --- because GST and the platform fee are not theirs. The
+\texttt{Math.min} guard exists because Razorpay rejects an order whose transfers
+exceed its amount, which can happen when the hotel only requires an advance
+deposit.
+
+\newpage
+%==============================================================================
+\section{Real-Time Messaging}
+\label{sec:messaging}
+
+\subsection{The data model}
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \texttt{conversations} --- exactly one per (hotel, guest) pair, enforced by
+        \texttt{unique (hotel\_id, guest\_id)}. This is why
+        \texttt{getOrCreateConversation()} can safely do
+        ``look it up, else insert it''.
+  \item \texttt{messages} --- \texttt{body}, \texttt{attachments} (jsonb),
+        \texttt{sender\_role} (\texttt{'guest'} or \texttt{'host'}).
+\end{itemize}
+
+\subsection{Unread counts are maintained by a trigger}
+
+The browser never increments a counter. Postgres does, on every insert.
+
+\begin{lstlisting}[language=SQL,caption={supabase/hms\_messaging\_migration.sql}]
+create or replace function public.on_message_inserted()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+declare v_preview text;
+begin
+  if new.body is not null and trim(new.body) <> '' then
+    v_preview := substring(new.body from 1 for 100);
+  else
+    v_preview := 'Photo';
+  end if;
+
+  update public.conversations
+  set last_message_at      = new.created_at,
+      last_message_preview = v_preview,
+      host_unread  = case when new.sender_role = 'guest' then host_unread  + 1 else host_unread  end,
+      guest_unread = case when new.sender_role = 'host'  then guest_unread + 1 else guest_unread end
+  where id = new.conversation_id;
+  return new;
+end; $$;
+
+create trigger on_message_inserted_trigger
+  after insert on public.messages
+  for each row execute function public.on_message_inserted();
+\end{lstlisting}
+
+Because it is a trigger, the counter is correct no matter \emph{how} the message
+got inserted --- from the web app, from a script, from the Supabase dashboard.
+
+\subsection{Two kinds of realtime, used for two different things}
+
+Supabase Realtime offers several primitives. We use two, and the distinction is
+worth knowing.
+
+\begin{longtable}{@{}p{3.4cm}p{4.4cm}p{7.0cm}@{}}
+\toprule
+\textbf{Primitive} & \textbf{What it is} & \textbf{Why we chose it here} \\
+\midrule
+\endhead
+\texttt{postgres\_changes} & Streams actual database row changes, read off
+Postgres's replication log. & Messages must be durable. If it is in the
+database, it is real. \\
+\addlinespace
+\texttt{broadcast} & An ephemeral pub/sub message that \emph{never touches the
+database}. & The ``typing...'' indicator. Writing every keystroke to Postgres
+would be absurd. It is transient by nature, so we send it transiently. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[language=TS,caption={components/messaging/useConversationMessages.ts}]
+const channel = supabase.channel(`room-${refinedId}`);
+
+channel
+  // A. New messages -- durable, from the DB replication stream
+  .on("postgres_changes",
+    { event: "INSERT", schema: "public", table: "messages",
+      filter: `conversation_id=eq.${refinedId}` },
+    (payload) => {
+      const newMsg = payload.new as Message;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;   // de-dupe
+        const next = [...prev, newMsg];
+        messageCache[activeId] = next;
+        return next;
+      });
+      triggerMarkRead(activeId);
+    })
+  // B. Typing status -- ephemeral, never stored
+  .on("broadcast", { event: "typing" }, (payload) => {
+    const { userId, isTyping } = payload.payload;
+    if (userId !== currentUserId) setIsOtherPartyTyping(isTyping);
+  })
+  .subscribe();
+
+return () => { supabase.removeChannel(channel); };   // clean up on unmount
+\end{lstlisting}
+
+\begin{notebox}
+\textbf{What is a WebSocket?} Normal HTTP is like posting letters: the browser
+asks, the server answers, the connection closes. A WebSocket is like leaving the
+phone line open. Either side can speak at any time. That is what lets the server
+push a message to your screen the instant it is written, with no polling.
+\end{notebox}
+
+\begin{warnbox}
+\textbf{Realtime respects RLS.} The \texttt{filter} in the subscription is not the
+security boundary --- a user could subscribe to another conversation's id. Supabase
+Realtime evaluates the \texttt{messages} SELECT policy for the subscribing user
+before delivering a row. Since that policy calls
+\texttt{can\_access\_conversation()}, an outsider simply receives nothing.
+\end{warnbox}
+
+\subsection{Optimistic UI: why sending feels instant}
+
+When you press Enter, the message appears \emph{before} the server has heard about
+it.
+
+\begin{lstlisting}[language=TS,caption={components/messaging/useConversationMessages.ts --- sendMessage}]
+const tempId = crypto.randomUUID();
+
+// Images render instantly from a local blob URL, before any upload finishes.
+const optimisticAttachments = files.map((file) => ({
+  url: URL.createObjectURL(file), type: "image",
+}));
+
+const optimisticMsg: Message = {
+  id: tempId, conversation_id: conversationId, sender_id: currentUserId,
+  sender_role: currentUserRole, body, attachments: optimisticAttachments,
+  created_at: new Date().toISOString(), read_at: null,
+  sending: true,                          // drives the little "clock" icon
+};
+setMessages((prev) => [...prev, optimisticMsg]);   // <-- appears immediately
+
+try {
+  const uploaded = await Promise.all(files.map(uploadToStorage));   // parallel
+  const message  = await apiSendMessage(conversationId, body, uploaded, tempId);
+  setMessages((prev) => prev.map((m) => (m.id === tempId ? message : m)));
+  optimisticAttachments.forEach((a) => URL.revokeObjectURL(a.url));  // free memory
+} catch (err) {
+  setMessages((prev) => prev.filter((m) => m.id !== tempId));        // roll back
+  optimisticAttachments.forEach((a) => URL.revokeObjectURL(a.url));
+  throw err;
+}
+\end{lstlisting}
+
+Two subtleties worth pointing out:
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item We pass \texttt{tempId} to the server so the real row gets \emph{the same
+        id}. That way when the realtime INSERT event arrives for our own message,
+        the \texttt{prev.some(m => m.id === newMsg.id)} de-duplication check
+        recognises it and does not draw it twice.
+  \item \texttt{URL.revokeObjectURL} is called on both success and failure.
+        \texttt{createObjectURL} pins the file in memory until you revoke it ---
+        forgetting this is a real memory leak in chat apps.
+\end{enumerate}
+
+\subsection{Image compression, before upload}
+
+\begin{lstlisting}[language=TS,caption={lib/compression.ts}]
+export async function compressFile(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;   // only images
+
+  const canvas = document.createElement("canvas");
+  const MAX_DIMENSION = 1200;                         // plenty for a chat bubble
+  // ... scale width/height down, preserving aspect ratio ...
+  ctx.drawImage(img, 0, 0, width, height);
+
+  canvas.toBlob(
+    (blob) => resolve(new File([blob], name + ".jpg", { type: "image/jpeg" })),
+    "image/jpeg",
+    0.6,   // quality: heavy compression, still clear
+  );
+}
+\end{lstlisting}
+
+It runs in the browser, so the user's bandwidth is saved, our Storage bill is
+saved, and the recipient's load is instant. A 12~MB phone photo becomes roughly
+150~KB.
+
+\subsection{The privacy problem, and \texttt{shares\_conversation\_with}}
+
+The chat panel shows Call / WhatsApp / Email buttons for the host. Those need the
+host's phone number, which lives in \texttt{profiles} --- a table whose RLS says
+``you may only read your own row''.
+
+The naive fix (``let guests read manager profiles'') would turn the platform into
+a phone directory. Instead we wrote a function that answers one narrow question.
+
+\begin{lstlisting}[language=SQL,caption={supabase/hms\_messaging\_names\_migration.sql}]
+create or replace function public.shares_conversation_with(p_profile_id uuid)
+returns boolean language sql stable
+security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.conversations c
+    where c.guest_id = p_profile_id
+      and ( c.guest_id = auth.uid()
+         or public.can_manage_hotel(c.hotel_id, 'reply_messages')
+         or public.get_my_role() = 'admin' )
+  );
+$$;
+
+create policy "profiles: read conversation guests"
+  on public.profiles for select
+  using (public.shares_conversation_with(id));
+\end{lstlisting}
+
+So contact details become visible \emph{only} once a real conversation exists
+between those two parties, and only to a party with permission to reply in it.
+
+For the reverse direction (public pages showing reviewer names), we do not expose
+\texttt{profiles} at all. We expose a \emph{view}:
+
+\begin{lstlisting}[language=SQL,caption={supabase/listing\_public\_migration.sql}]
+-- Exposes ONLY id, full_name, created_at. Never phone, dob, email, or location.
+CREATE OR REPLACE VIEW public.public_profiles AS
+  SELECT id, full_name, created_at FROM public.profiles;
+
+GRANT SELECT ON public.public_profiles TO anon, authenticated;
+\end{lstlisting}
+
+\saythis{A guest needs the host's phone number to call them --- but only if they are
+actually talking to that host. So instead of loosening the profiles policy, we
+wrote a \texttt{SECURITY DEFINER} function that checks for a shared conversation,
+and made \emph{that} the policy. For public pages we never touch \texttt{profiles};
+we expose a view containing only name and join date.}
+
+\subsection{The contact buttons themselves}
+
+No library. Just URL schemes every device understands.
+
+\begin{lstlisting}[language=HTML]
+<a href="tel:+917736184696">Call</a>
+<a href="https://wa.me/917736184696">WhatsApp</a>   <!-- digits only, no + or spaces -->
+<a href="mailto:host@example.com">Email</a>
+\end{lstlisting}
+
+\newpage
+%==============================================================================
+\section{QR Code Check-In}
+
+\subsection{What the QR code actually contains}
+
+Not a secret. Not a token. A plain URL:
+
+\begin{lstlisting}[language=TS,caption={components/SuccessClient.tsx / app/bookings/[id]/page.tsx}]
+import QRCode from "qrcode";
+
+const qrCodeUrl = await QRCode.toDataURL(
+  `${origin}/bookings/${booking.id}/check-in`
+);
+// -> "data:image/png;base64,iVBORw0KGgo..."  (an image, inline, no file needed)
+\end{lstlisting}
+
+\begin{notebox}
+\textbf{Why is it safe to put the booking id in a QR code?} Because knowing an id
+grants nothing. To \emph{use} it, the scanner must call
+\texttt{check\_in\_booking()}, which asks Postgres
+\texttt{can\_operate\_hotel(booking.hotel\_id)}. Only that hotel's manager or
+assigned staff pass. A stranger who photographs your QR code can look at the
+booking page (RLS blocks them) and check you in (the RPC blocks them). Nothing.
+
+Note also that the QR encodes a \emph{URL}, so a guest who scans their own code
+with a normal camera app lands on their check-in page. Nice touch, and it means
+the code degrades gracefully.
+\end{notebox}
+
+Note that \texttt{toDataURL} returns a base64 data URI, which we drop straight
+into an \texttt{<img src>}. No file is written, nothing is uploaded, nothing is
+stored. The QR is regenerated on every page render from the booking id.
+
+\subsection{Scanning it (front desk)}
+
+\begin{lstlisting}[language=TS,caption={app/manager/manage/[hotelId]/FrontDesk.tsx}]
+import { Html5Qrcode } from "html5-qrcode";
+
+useEffect(() => {
+  const html5Qrcode = new Html5Qrcode("qr-reader");
+  html5Qrcode.start(
+    { facingMode: "environment" },        // rear camera on a phone
+    { fps: 10, qrbox: (w, h) => { const s = Math.min(w, h) * 0.7;
+                                  return { width: s, height: s }; } },
+    (decodedText) => onScan(decodedText),
+    () => { /* ignore scan failures -- normal when the QR is out of frame */ },
+  );
+  return () => { if (html5Qrcode.isScanning) html5Qrcode.stop(); };  // release camera
+}, [onScan, onError]);
+\end{lstlisting}
+
+The cleanup function is not optional. If you unmount without calling
+\texttt{stop()}, the camera light stays on.
+
+\subsection{From scanned text to a check-in}
+
+\begin{lstlisting}[language=TS,caption={app/manager/manage/[hotelId]/FrontDesk.tsx}]
+onScan={async (decodedText) => {
+  // The QR holds a URL; pull the UUID out of it. Fall back to raw text so a
+  // plain booking id also scans.
+  const match = decodedText.match(/bookings\/([a-f0-9-]{36})/i);
+  const bookingId = match ? match[1] : decodedText.trim();
+
+  let matched = bookings.find((b) => b.id.toLowerCase() === bookingId.toLowerCase());
+
+  // The booking may be newer than our cached list -- re-fetch before giving up.
+  if (!matched) {
+    const res = await fetch(`/api/manager/manage/${hotel.id}`);
+    ...
+  }
+}}
+\end{lstlisting}
+
+Then the server action:
+
+\begin{lstlisting}[language=SQL,caption={supabase/hms\_management\_migration.sql}]
+create or replace function public.check_in_booking(p_booking_id uuid)
+returns void language plpgsql security definer set search_path = public
+as $$
+declare v_b public.bookings;
+begin
+  select * into v_b from public.bookings where id = p_booking_id;
+  if not found then raise exception 'Booking not found'; end if;
+  if not public.can_operate_hotel(v_b.hotel_id) then raise exception 'Not allowed'; end if;
+  if v_b.status <> 'confirmed' then
+    raise exception 'Only confirmed bookings can be checked in'; end if;
+  update public.bookings set status = 'checked_in' where id = p_booking_id;
+end; $$;
+\end{lstlisting}
+
+Three guards, in order: does it exist, may you touch this hotel, is it in the
+right state. A pending (unpaid) booking cannot be checked in. A cancelled one
+cannot. And it cannot be checked in twice, because after the first time its
+status is no longer \texttt{'confirmed'}.
+
+\saythis{The QR is just a URL containing the booking id. Security is not in the
+code --- it is in \texttt{check\_in\_booking}, which verifies the scanner is that
+hotel's manager or staff via \texttt{can\_operate\_hotel}, and that the booking is
+in \texttt{confirmed} state. Scan it twice and the second one is rejected, because
+the status has moved on.}
+
+\newpage
+%==============================================================================
+\section{Maps}
+
+\subsection{What we use, and what we deliberately did not}
+
+\begin{longtable}{@{}p{3.2cm}p{11.6cm}@{}}
+\toprule
+\textbf{Option} & \textbf{Verdict} \\
+\midrule
+\endhead
+Google Maps & \textbf{Rejected.} Requires an API key tied to a credit card. The
+key must be shipped to the browser, where anyone can steal it and run up your
+bill. Free tier ends. \\
+\addlinespace
+Mapbox & \textbf{Rejected.} Same key-in-the-browser problem, plus a monthly
+map-load quota. \\
+\addlinespace
+Static PNG tiles & \textbf{Rejected.} Not interactive. \\
+\addlinespace
+\textbf{MapLibre GL + OpenFreeMap} & \textbf{Chosen.} MapLibre is the open-source
+fork of Mapbox GL (from before it went proprietary). OpenFreeMap serves
+OpenStreetMap vector tiles with \textbf{no API key and no rate limit}. Renders
+with WebGL, so panning and zooming are buttery. \\
+\addlinespace
+\textbf{Leaflet + CartoDB Voyager} & \textbf{Chosen, as the fallback.} If WebGL is
+unavailable or the vector style fails to load, we transparently swap to Leaflet
+with raster tiles. The map never disappears. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[language=TS,caption={components/LocationMap.tsx}]
+// Rich, free, no-key OpenStreetMap vector tiles (ODbL). "positron" is the clean,
+// muted, modern style -- keeps street/place labels but drops the loud OSM colors.
+const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
+
+// CartoDB Voyager -- the richest of our free raster basemaps. Used as the
+// fallback engine (Leaflet) when the vector map fails to load.
+const VOYAGER_TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+
+/**
+ * One interactive map surface. Tries MapLibre + OpenFreeMap (rich vector); if
+ * that fails to load, transparently falls back to Leaflet + Voyager so the map
+ * never disappears. Both engines share the same pin, popup and zoom controls.
+ */
+\end{lstlisting}
+
+\subsection{Vector tiles vs raster tiles}
+
+\textbf{Raster} tiles are pre-rendered PNG images, 256$\times$256 pixels. Zoom in
+and they go blurry until the next zoom level downloads.
+
+\textbf{Vector} tiles ship the \emph{geometry} --- ``this road is a line through
+these coordinates'' --- and the browser draws it with WebGL. So labels stay sharp
+at any zoom, the map can rotate and tilt, and you can restyle it (that is how we
+get the muted ``positron'' palette that matches our cream-and-green theme without
+touching a server).
+
+\subsection{Where maps appear}
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \file{app/hotels/[id]/components/LocationSection.tsx} --- one pin, the
+        hotel, with a fullscreen mode.
+  \item \file{app/hotels/ExploreMap.tsx} --- every approved hotel as a clickable
+        pin, split-screen with the results grid.
+  \item \file{app/manager/create-hotel/components/LeafletMap.tsx} --- the
+        \emph{picker}. The manager clicks to drop a pin; we store
+        \texttt{latitude} and \texttt{longitude} on the hotel row. Leaflet is used
+        here because click-to-place needs nothing fancy, and it is smaller.
+\end{itemize}
+
+\saythis{We use MapLibre with OpenFreeMap vector tiles --- both fully open source,
+no API key, no billing. Google Maps and Mapbox both require a key that has to be
+shipped to the browser, where anyone can lift it. And we kept Leaflet with raster
+tiles as an automatic fallback, so if WebGL is unavailable the map still renders.}
+
+\newpage
+%==============================================================================
+\section{Email Notifications}
+
+\subsection{Why Brevo, and why HTTP instead of SMTP}
+
+\begin{lstlisting}[language=TS,caption={lib/email.ts --- the header comment is the answer}]
+// Transactional email via Brevo's HTTP API. HTTP (not SMTP) so it works
+// reliably on serverless. Server-only: never import this into client code,
+// it reads BREVO_API_KEY. All sends are best-effort and never throw -- a failed
+// email must never break the action that triggered it.
+\end{lstlisting}
+
+Three reasons, all in that comment:
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item \textbf{HTTP, not SMTP.} Serverless functions on Vercel are short-lived
+        and often block outbound SMTP ports. An HTTPS \texttt{fetch} always works.
+  \item \textbf{Server-only.} It reads \texttt{BREVO\_API\_KEY}. Importing it into
+        a Client Component would leak the key.
+  \item \textbf{Never throws.} \texttt{sendEmail} returns \texttt{false} on
+        failure. A down mail provider must never fail a paid booking.
+\end{enumerate}
+
+And why Brevo over SendGrid/Mailgun/Resend: Brevo's free tier does not require you
+to own and verify a custom domain, which matters for a student project with no
+domain to verify.
+
+\begin{lstlisting}[language=TS,caption={lib/email.ts}]
+export async function sendEmail(input: SendEmailInput): Promise<boolean> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey || !from) {
+    console.error("[email] BREVO_API_KEY or EMAIL_FROM missing -- skipping send");
+    return false;
+  }
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": apiKey, "content-type": "application/json" },
+      body: JSON.stringify({
+        sender: { email: from, name: fromName },
+        to: [{ email: input.to, name: input.toName }],
+        subject: input.subject,
+        htmlContent: input.html,
+      }),
+    });
+    if (!res.ok) { console.error("[email] Brevo send failed", res.status); return false; }
+    return true;
+  } catch (err) { console.error("[email] send error", err); return false; }
+}
+\end{lstlisting}
+
+\subsection{The emails we send}
+
+One file each, under \file{lib/emails/}:
+\texttt{bookingConfirmation}, \texttt{bookingCancellation},
+\texttt{checkInConfirmation}, \texttt{checkOutConfirmation},
+\texttt{refundProcessed}, \texttt{staffInvite}, \texttt{managerVerification},
+\texttt{listingDecision}.
+
+\subsection{Why email HTML is written with tables and inline styles}
+
+If you open \file{lib/email.ts} you will find \texttt{<table role="presentation">}
+everywhere and every style written inline. This looks like 2003 HTML, and it is
+deliberate: \textbf{email clients strip \texttt{<style>} blocks}, and Outlook renders
+with Microsoft Word's layout engine, which does not understand flexbox or grid.
+Tables and inline styles are the only things that render identically in Gmail,
+Outlook, and Apple Mail. The comment in the source says exactly this:
+\emph{``Inline styles only (email clients strip \texttt{<style>}/CSS).''}
+
+The QR code in the confirmation email is fetched from an external QR image service
+rather than embedded, because many clients block base64 images.
+
+\newpage
+%==============================================================================
+\section{Managers, Staff and the Admin Panel}
+
+\subsection{Staff are real accounts, not sub-users}
+
+A staff member has \texttt{role = 'staff'} in \texttt{profiles} and a row in
+\texttt{hotel\_staff} linking them to \emph{one hotel} with a
+\texttt{permissions text[]} array (e.g.
+\texttt{\{offline\_booking, view\_occupancy, reply\_messages\}}).
+
+Every permission check in the database funnels through one of two functions:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+  \item \texttt{can\_operate\_hotel(hotel)} --- manager \emph{or any} staff.
+        Used for check-in/check-out.
+  \item \texttt{can\_manage\_hotel(hotel, perm)} --- manager \emph{or} staff who
+        hold that specific permission. Used for messaging and room management.
+\end{itemize}
+
+\subsection{The invite flow}
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+  \item Manager enters an email and ticks permissions.
+  \item A row is created in \texttt{staff\_invites} with a random UUID
+        \texttt{token} and \texttt{expires\_at = now() + 14 days}.
+  \item Brevo sends the invitation link.
+  \item The invitee signs up (or logs in) and lands on \file{app/staff/accept/}.
+  \item \texttt{accept\_my\_staff\_invites()} matches pending invites by the
+        \emph{logged-in user's email}, creates the \texttt{hotel\_staff} rows, and
+        flips their profile role to \texttt{staff}.
+\end{enumerate}
+
+Matching on the authenticated email (not just the token) means a stolen link
+cannot be redeemed by somebody else's account.
+
+\subsection{Manager verification}
+
+A manager cannot list a hotel until an admin approves them. \file{proxy.ts}
+enforces this: any \texttt{/manager/*} request from an unapproved manager is
+redirected to \texttt{/manager/waiting}. Statuses are \texttt{pending},
+\texttt{approved}, \texttt{rejected}, and \texttt{more\_info} --- the last lets an
+admin ask for a better document without a hard rejection.
+
+\subsection{Every admin action is an audited RPC}
+
+\begin{lstlisting}[language=SQL,caption={supabase/hms\_admin\_migration.sql}]
+create or replace function public.admin_review_hotel(
+  p_id uuid, p_decision text, p_reason text default null)
+returns void language plpgsql security definer set search_path = public
+as $$
+declare v_uid uuid := auth.uid(); v_h public.hotels;
+begin
+  if public.get_my_role() <> 'admin' then raise exception 'Not allowed'; end if;
+  if p_decision not in ('approved', 'rejected') then raise exception 'Invalid decision'; end if;
+
+  update public.hotels
+    set status = p_decision,
+        rejection_reason = case when p_decision = 'rejected' then p_reason else null end,
+        reviewed_at = now(), reviewed_by = v_uid,
+        published_at = case when p_decision = 'approved' then now() else published_at end
+    where id = p_id;
+
+  insert into public.admin_audit_log (admin_id, action, target_type, target_id, details)
+    values (v_uid, 'hotel_' || p_decision, 'hotel', p_id,
+            jsonb_build_object('reason', p_reason, 'name', v_h.name));
+end; $$;
+\end{lstlisting}
+
+The pattern never varies: \emph{check the role, validate the input, do the work,
+write the audit row} --- all in one transaction, so an action can never be
+performed without being logged.
+
+\saythis{Admin powers do not live in the API layer. They live in
+\texttt{SECURITY DEFINER} functions that begin by asserting
+\texttt{get\_my\_role() = 'admin'} and end by writing an audit-log row --- in the
+same transaction. So an admin action that is not logged is not possible.}
+
+\newpage
+%==============================================================================
+\section{Every Package, and Why It Is There}
+
+\subsection{Runtime dependencies}
+
+\begin{longtable}{@{}p{3.3cm}p{4.7cm}p{6.8cm}@{}}
+\toprule
+\textbf{Package} & \textbf{What it does} & \textbf{Why this one} \\
+\midrule
+\endhead
+\texttt{next} 16.2 & The framework: routing, SSR, API routes, caching. &
+One codebase for frontend and backend. Server Components remove a whole class of
+API endpoints. \\
+\addlinespace
+\texttt{react} 19.2 & The UI library. & Required by Next.js. v19 gives us Server
+Components and Actions. \\
+\addlinespace
+\texttt{@supabase/supabase-js} & The database/auth/storage/realtime client. &
+The official SDK. \\
+\addlinespace
+\texttt{@supabase/ssr} & Cookie-aware Supabase clients for server rendering. &
+Without it, the server cannot read the user's session, so RLS would see every
+server-side query as anonymous. \\
+\addlinespace
+\texttt{razorpay} & Server-side SDK for creating orders and fetching payments. &
+Only used server-side --- it holds the secret. \\
+\addlinespace
+\texttt{swr} & Client data fetching with stale-while-revalidate + preloading. &
+Tiny (about 4~KB), made by the Next.js team, and its \texttt{preload()} gives us
+hover-prefetching on the dashboards. Chosen over TanStack Query because we needed
+caching, not a full query engine. \\
+\addlinespace
+\texttt{maplibre-gl} & WebGL vector map renderer. & Open-source, no API key. \\
+\addlinespace
+\texttt{leaflet} & Lightweight raster map. & Fallback engine + the location picker
+in the create-hotel wizard. \\
+\addlinespace
+\texttt{qrcode} & Generates the check-in QR as a base64 data URI. & Runs on the
+server; no image file to store. \\
+\addlinespace
+\texttt{html5-qrcode} & Reads QR codes from a device camera. & Browser-only;
+handles camera permissions and decoding. \\
+\addlinespace
+\texttt{isomorphic-dompurify} & Sanitises HTML. & The rich-text hotel description
+is manager-supplied HTML. Rendering it raw would be a stored-XSS hole. This
+version runs in \emph{both} browser and Node, so we sanitise on write
+(\file{lib/hotelDraft.ts}) \emph{and} on render
+(\file{OverviewSection.tsx}). \\
+\addlinespace
+\texttt{motion} & Animation (the library formerly called Framer Motion). &
+Used in 37 files for page transitions, modals, and the chat. Declarative:
+\texttt{animate=\{...\}} instead of manual CSS keyframes. \\
+\addlinespace
+\texttt{gsap} & Timeline animation. & Used once, for the landing-page hero
+sequence, where we needed precisely choreographed timing. \\
+\addlinespace
+\texttt{lucide-react} & SVG icon set. & Tree-shakeable; each icon is a React
+component, so we ship only the icons we use. \\
+\addlinespace
+\texttt{@animateicons/react} & Animated icons. & Used in the navbar. \\
+\addlinespace
+\texttt{canvas-confetti} & The confetti burst on booking success. & Pure joy.
+About 3~KB. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Development dependencies}
+
+\begin{longtable}{@{}p{3.3cm}p{11.5cm}@{}}
+\toprule
+\textbf{Package} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{typescript} & Static types. Catches ``you forgot this field'' before
+runtime. Everything shared lives in \file{lib/types.ts}. \\
+\addlinespace
+\texttt{tailwindcss} v4 + \texttt{@tailwindcss/postcss} & Utility-first CSS.
+v4 configures itself in \file{app/globals.css} --- there is no
+\texttt{tailwind.config.js} any more. \\
+\addlinespace
+\texttt{eslint}, \texttt{eslint-config-next} & Linting with the Next.js rule set
+(catches, e.g., using a hook in a Server Component). \\
+\addlinespace
+\texttt{pg} & A raw Postgres driver, used only by the local seed script
+(\file{supabase/seed\_hotels.ts}). Not shipped. \\
+\addlinespace
+\texttt{@types/*} & Type definitions for the JS-only libraries above. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Things we chose \emph{not} to use}
+
+\begin{longtable}{@{}p{3.3cm}p{11.5cm}@{}}
+\toprule
+\textbf{Not used} & \textbf{Why not} \\
+\midrule
+\endhead
+Redux / Zustand & There is very little global client state. Server Components hold
+the data; \texttt{AuthProvider} and \texttt{CurrencyProvider} are two small React
+Contexts. A store would have been ceremony without benefit. \\
+\addlinespace
+Prisma / Drizzle & An ORM would sit \emph{above} the database and would tempt us
+into writing authorisation in TypeScript. We wanted RLS and PL/pgSQL to be the
+source of truth, so we talk to Postgres through PostgREST and RPC. \\
+\addlinespace
+Express / Nest & Next.js Route Handlers already are the backend. A second server
+would need its own deploy, its own auth, its own CORS. \\
+\addlinespace
+Socket.io & Would require a long-lived server process, which Vercel's serverless
+functions are not. Supabase Realtime is a managed WebSocket layer that already
+knows our RLS policies. \\
+\addlinespace
+Stripe & Weak UPI support in India. Razorpay is the local standard. \\
+\bottomrule
+\end{longtable}
+
+\newpage
+%==============================================================================
+\section{Security Summary}
+
+If you are asked ``how secure is this?'', walk down this list.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Row Level Security on every table.} The database refuses to return
+        rows you may not see. Not the API --- the database.
+  \item \textbf{The service-role key is used in exactly one file}
+        (\file{lib/supabase/admin.ts}) and imported by exactly one caller: the
+        Razorpay webhook, where no user session exists.
+  \item \textbf{Every \texttt{SECURITY DEFINER} function pins
+        \texttt{search\_path = public}}, closing the classic privilege-escalation
+        path.
+  \item \textbf{Prices are never accepted from the client.} \texttt{book\_room}
+        reads \texttt{rooms.price} itself.
+  \item \textbf{Payment signatures are HMAC-verified with
+        \texttt{crypto.timingSafeEqual}}, both for the checkout callback and the
+        webhook (the webhook signs the \emph{raw body}, so we read
+        \texttt{request.text()} before parsing).
+  \item \textbf{Manager-supplied HTML is sanitised with DOMPurify}, on write and
+        on render.
+  \item \textbf{Overbooking is impossible} by CHECK constraint, independent of
+        application logic.
+  \item \textbf{Emails and payment confirmations are idempotent}, so a retried
+        webhook cannot double-charge or double-send.
+  \item \textbf{Personal data is never exposed by default.} Public pages read
+        \texttt{public\_profiles} (id, name, join date). Phone numbers unlock only
+        via \texttt{shares\_conversation\_with}.
+  \item \textbf{Every admin action is written to an append-only audit log}, in the
+        same transaction as the action.
+\end{enumerate}
+
+\newpage
+%==============================================================================
+\section{Frequently Asked Questions}
+
+Grouped by the part of the system they attack. Read the question, try to answer
+out loud, \emph{then} read the answer.
+
+\subsection{Architecture and Next.js}
+
+\Q{Why Next.js and not plain React with an Express backend?}
+\A{Because we would then be maintaining two applications, two deploys, and a CORS
+configuration. With Next.js the same project renders the HTML \emph{and} serves
+the API routes. It also gives us Server Components, which let a page read the
+database directly and ship zero JavaScript for that work --- with plain React,
+every page would need a loading spinner and an API endpoint.}
+
+\Q{What is the difference between a Server Component and a Client Component?}
+\A{A Server Component runs on the server only. Its JavaScript is never sent to the
+browser, and it can \texttt{await} a database query directly. A Client Component
+(marked \texttt{"use client"}) is shipped to the browser and can use state,
+effects and browser APIs. Our rule: fetch in the Server Component, pass the data
+as props to a small Client Component for interactivity. That is why the codebase
+is full of \texttt{page.tsx} plus \texttt{SomethingClient.tsx} pairs.}
+
+\Q{How does routing work? Where is the route config?}
+\A{There is none. The folder structure \emph{is} the routing table.
+\file{app/hotels/[id]/page.tsx} serves \texttt{/hotels/<id>}. A folder in square
+brackets is a dynamic segment. A \file{route.ts} makes the folder an API endpoint
+rather than a page.}
+
+\Q{Why is your middleware file called \file{proxy.ts}?}
+\A{Next.js 16 renamed the convention from \file{middleware.ts} to \file{proxy.ts}.
+It does the same job --- runs before matching requests. Our \texttt{matcher} only
+lists \texttt{/dashboard}, \texttt{/manager} and \texttt{/admin}, so public pages
+skip it entirely and pay no auth cost.}
+
+\Q{If middleware protects your routes, what happens if I call the API directly?}
+\A{Nothing bad. \texttt{/api} is deliberately \emph{not} in the matcher. Every API
+route authenticates independently --- admin routes call \texttt{getAdminContext()},
+and every query is subject to RLS regardless. Middleware exists so users get a
+friendly redirect, not as the security boundary.}
+
+\Q{What is a Server Action, and is it safe?}
+\A{A function marked \texttt{"use server"} that a Client Component can import and
+call like a normal function; Next.js turns the call into a POST behind the scenes.
+It is \emph{not} inherently safe --- it is a public endpoint, and anyone can call
+it with any arguments. That is why every action in \file{app/messages/actions.ts}
+and friends re-verifies the user with \texttt{auth.getUser()} and relies on RLS.}
+
+\Q{Explain your caching strategy.}
+\A{Three layers. (1) \texttt{unstable\_cache} caches the expensive approved-hotels
+query result under the tag \texttt{"hotels"} with a one-hour fallback. (2) When an
+admin approves or a manager edits a hotel, we call \texttt{revalidateTag("hotels")}
+and the cache is dropped immediately. (3) The hotel detail page also sets
+\texttt{export const revalidate = 60}, so its rendered HTML is CDN-cached for a
+minute. Fast by default, correct the moment data changes.}
+
+\Q{Why is there a \file{lib/supabase/public.ts} when \file{server.ts} exists?}
+\A{Because \texttt{unstable\_cache} forbids reading request-scoped data such as
+cookies --- the cached value must not depend on who asked. \file{server.ts} reads
+cookies. So for cached queries we use a stateless, cookie-free anon client. RLS
+still applies; anonymous can only read approved hotels.}
+
+\Q{What is SWR and why did you use it over TanStack Query?}
+\A{SWR shows the cached (stale) data instantly, then revalidates in the background.
+We picked it because it is about 4~KB, comes from the Next.js team, and its
+\texttt{preload()} lets us prefetch a dashboard's data when the user merely
+\emph{hovers} its sidebar link --- see \texttt{managerApiForRoute()} in
+\file{lib/swr.ts}. We needed a cache, not a full query engine.}
+
+\subsection{Supabase and the database}
+
+\Q{What is Row Level Security, in one sentence?}
+\A{A rule attached to a table that Postgres silently appends to every query, so a
+user physically cannot read or write rows the rule excludes --- even if they hold a
+valid API key and bypass our application entirely.}
+
+\Q{Isn't it dangerous to put a database key in the browser?}
+\A{No --- that is the design. The anon key gets you \emph{to} the database; RLS
+decides what you get \emph{out of} it. The dangerous key is the service-role key,
+which bypasses RLS. That one lives in \file{lib/supabase/admin.ts}, is never
+prefixed \texttt{NEXT\_PUBLIC\_}, and is used only by the Razorpay webhook.}
+
+\Q{Why do you have four Supabase clients?}
+\A{Browser (manages cookies), server (reads this request's cookies so RLS knows
+who you are), public (cookie-free, because caching forbids request-scoped data),
+and admin (service role, bypasses RLS, webhook only). Four constraints, four
+clients.}
+
+\Q{You have a lot of logic in SQL. Why not in TypeScript?}
+\A{Four reasons. Atomicity: \texttt{book\_room} reserves inventory, creates the
+booking and creates the payment in one transaction that rolls back entirely on
+failure. Concurrency: only the database can take a row lock. Trust: the price is
+computed from the database's own numbers, so a tampered client cannot set it. And
+single-source: the web app and the webhook both confirm payments by calling the
+same function.}
+
+\Q{What is \texttt{SECURITY DEFINER} and why is it everywhere?}
+\A{It makes a function run with the privileges of its creator rather than its
+caller, so RLS does not apply inside it. We need it for two things: to let a
+policy read a table without triggering that table's own policy (avoiding infinite
+recursion), and to let a guest trigger a controlled write they could not perform
+directly. Every one of ours pins \texttt{search\_path = public} so an attacker
+cannot swap in a malicious schema.}
+
+\Q{You mentioned RLS recursion. Show me the actual problem.}
+\A{The \texttt{hotels} policy wants to know ``is the caller staff on this hotel?'',
+which reads \texttt{hotel\_staff}. The \texttt{hotel\_staff} policy wants to know
+``does the caller own this hotel?'', which reads \texttt{hotels}. Each policy
+triggers the other, forever. Postgres throws \texttt{infinite recursion detected
+in policy}. We broke the cycle with single-table \texttt{SECURITY DEFINER} helpers
+--- \texttt{owns\_hotel()} and \texttt{is\_hotel\_staff()} --- which read one table
+each with RLS bypassed. That is what \file{hms\_rls\_recursion\_fix.sql} is.}
+
+\Q{How does a user get a profile row?}
+\A{A trigger, \texttt{handle\_new\_user}, fires \texttt{after insert on
+auth.users}. It reads the sign-up metadata we passed to
+\texttt{supabase.auth.signUp()} and inserts the profile --- and, if the role is
+manager, a pending \texttt{manager\_verifications} row too. Because it is a
+trigger, a user without a profile is structurally impossible.}
+
+\Q{How do you make hotel search fast?}
+\A{Searching is \texttt{ILIKE '\%goa\%'}, and a normal B-tree index cannot serve a
+leading wildcard --- Postgres would scan every row. So we enabled the
+\texttt{pg\_trgm} extension and created GIN trigram indexes on name, location,
+city and state. We also created a \emph{partial} index on
+\texttt{(created\_at desc) where status = 'approved'}, which satisfies both the
+filter and the sort of the catalogue query with no sort step.}
+
+\Q{Why is there a \texttt{public\_profiles} view?}
+\A{Because review author names and the host card are public, but phone numbers and
+dates of birth are not. The view selects only \texttt{id}, \texttt{full\_name} and
+\texttt{created\_at}, and \emph{that} is what we grant to \texttt{anon}. There is
+no way to widen it accidentally.}
+
+\subsection{Booking and concurrency}
+
+\Q{Two users book the last room at the same instant. What happens?}
+\A{This is the question I most wanted to be asked. Inside \texttt{book\_room} we do
+\texttt{SELECT total\_count - booked\_count ... FOR UPDATE}, which takes a
+row-level lock on that night's inventory row. The second transaction blocks on that
+lock, and when it resumes it reads the \emph{updated} count, sees zero available,
+and raises an exception --- which rolls back the whole function, including any
+nights it had already reserved. And as a final backstop the table has
+\texttt{check (booked\_count <= total\_count)}, so even a bug in our logic could
+not overbook the hotel.}
+
+\Q{Why is availability \texttt{total\_units - max(booked\_count)} and not the sum
+or the average?}
+\A{Because a guest needs the room on \emph{every} night of their stay. If the room
+is full on the middle night, the whole range is unbookable. Taking the maximum
+booked count across the range gives exactly the number of units free for the
+entire stay.}
+
+\Q{Why \texttt{i.date < p\_check\_out} rather than \texttt{<=}?}
+\A{You do not occupy a room on the night of the day you check out. A stay from the
+14th to the 16th consumes the nights of the 14th and 15th --- two nights, two
+inventory rows.}
+
+\Q{Do you create an inventory row for every room for every future date?}
+\A{No, that would be tens of thousands of rows per hotel. They are created lazily:
+\texttt{insert ... on conflict (room\_id, date) do nothing} runs just before we
+lock the row, so the row exists exactly when it is first needed.}
+
+\Q{You calculate the price in TypeScript \emph{and} in SQL. Isn't that a bug
+waiting to happen?}
+\A{The TypeScript one is a preview so the breakdown updates instantly as you pick
+dates --- and the source comment says so: ``Mirror of the server-side price math in
+\texttt{book\_room} (kept in sync for preview).'' Its number is never sent to the
+server. \texttt{POST /api/bookings} accepts a room id and dates, nothing else; the
+database computes the real price from \texttt{rooms.price} and
+\texttt{hotels.gst\_percent}. If they drifted, the user would see a wrong preview,
+never a wrong charge.}
+
+\Q{What is your refund policy and where does it live?}
+\A{100\% at 48 hours or more before check-in, 50\% between 24 and 48 hours,
+nothing under 24 hours. It is computed in \texttt{cancel\_booking}, which also
+releases the inventory night by night using \texttt{greatest(0, booked\_count -
+num\_rooms)} so the count can never go negative.}
+
+\Q{Why does \texttt{cancel\_booking} appear in two SQL files?}
+\A{Migrations are applied in order and each uses \texttt{create or replace}. The
+first version (in \file{booking\_schema.sql}) allowed the guest and admins. The
+later one (in \file{hms\_management\_migration.sql}) also allows the hotel's
+manager and staff, so the front desk can cancel for a guest who phones the hotel.
+The later definition wins.}
+
+\subsection{Payments}
+
+\Q{Walk me through a payment.}
+\A{The browser POSTs a booking id to \file{/api/payments/razorpay/order}. The
+server reads the booking (RLS proves ownership), converts the total to paise, calls
+\texttt{razorpay.orders.create}, stores the returned order id on the payment row,
+and returns the order id plus the \emph{publishable} key. The browser opens
+Razorpay's checkout modal --- card details go straight to Razorpay, never to us. On
+success Razorpay hands the browser a payment id and a signature, which we POST to
+\file{/api/payments/razorpay/verify}. There we recompute
+\texttt{HMAC\_SHA256(order\_id + "|" + payment\_id)} with our secret and compare it
+in constant time. If it matches, we call \texttt{confirm\_razorpay\_payment} and
+the booking becomes confirmed.}
+
+\Q{Why verify on the server? The browser already knows the payment succeeded.}
+\A{Because the browser is not trustworthy. Anyone can open dev tools and POST
+\texttt{\{bookingId, paymentId: "anything"\}} to our verify endpoint. The signature
+is the proof: it is an HMAC keyed with a secret only Razorpay and our server hold.
+Without the secret you cannot forge it.}
+
+\Q{What is \texttt{timingSafeEqual} and why not just \texttt{===}?}
+\A{\texttt{===} short-circuits at the first differing character, so the time it
+takes leaks how many leading characters were correct. With enough precise
+measurements an attacker can recover the signature one byte at a time. That is a
+timing attack. \texttt{crypto.timingSafeEqual} always compares every byte.}
+
+\Q{What if the user's browser dies right after paying?}
+\A{Three independent paths confirm a booking, and we need all three. The happy
+path is the checkout callback. The webhook is Razorpay's server calling ours
+directly --- it works even with the browser closed, and because there is no user
+session it uses the service-role client. And the reconcile path runs when the user
+re-opens the booking: it asks Razorpay \texttt{orders.fetchPayments(orderId)} and
+confirms if a captured payment exists.}
+
+\Q{If three paths can confirm the booking, does the guest get three emails?}
+\A{No. The email function performs an atomic claim: a single
+\texttt{UPDATE bookings SET confirmation\_email\_sent\_at = now() WHERE id = \$1
+AND status = 'confirmed' AND confirmation\_email\_sent\_at IS NULL} that returns
+the row. Postgres guarantees exactly one caller wins; the others get zero rows and
+return immediately. It is a compare-and-swap written in SQL.}
+
+\Q{Why does the webhook read \texttt{request.text()} instead of
+\texttt{request.json()}?}
+\A{Because the signature is computed over the \emph{exact bytes} Razorpay sent.
+Parsing to JSON and re-serialising would change whitespace and key order, and the
+HMAC would no longer match. You must hash the raw body.}
+
+\Q{The webhook updates a booking to confirmed. What stops it resurrecting a
+cancelled booking?}
+\A{The update is
+\texttt{.eq("id", bookingId).eq("status", "pending")}. Only a booking still awaiting
+payment can be promoted. A late webhook for a booking that has since been cancelled
+matches zero rows.}
+
+\Q{Why Razorpay and not Stripe?}
+\A{The platform is India-first. Razorpay has first-class UPI, net banking and
+Indian card support, prices in INR natively, and has a proper test mode. Stripe's
+UPI support in India is weak. Razorpay also gave us \emph{Route}, which lets a
+single payment be split so the hotel's share settles directly to their account
+while we keep our 15\% commission.}
+
+\Q{How does the commission split work?}
+\A{If the manager has linked a Razorpay account, the order carries a
+\texttt{transfers} array with \texttt{base\_price * (1 - 0.15)} in paise. Razorpay
+settles that to them and keeps the rest with us. Note it is computed on
+\texttt{base\_price}, the room revenue --- not on \texttt{total\_price}, because GST
+and the platform fee are not the manager's money. And we clamp it with
+\texttt{Math.min(managerShare, amountPaise)} because Razorpay rejects an order
+whose transfers exceed its own amount, which can happen when a hotel only takes an
+advance deposit.}
+
+\Q{Are you handling real money?}
+\A{We are in Razorpay \emph{test mode}, which simulates the full flow --- including
+webhooks and signature verification --- with test card numbers, so no real money
+moves. Switching to production is a matter of changing the API keys; not a line of
+our code changes.}
+
+\subsection{Messaging}
+
+\Q{How is the chat real-time? Are you polling?}
+\A{No polling. The browser opens a WebSocket to Supabase Realtime and subscribes to
+\texttt{postgres\_changes} for \texttt{INSERT} on the \texttt{messages} table,
+filtered to one conversation. Supabase reads Postgres's replication log, so the
+moment a row is committed it is pushed to every subscriber.}
+
+\Q{Someone could subscribe to another conversation's id. Isn't that a data leak?}
+\A{No. The filter is a convenience, not a security control. Supabase Realtime
+evaluates the \texttt{messages} SELECT policy for the subscribing user before
+delivering any row, and that policy calls \texttt{can\_access\_conversation()}. An
+outsider's subscription simply receives nothing.}
+
+\Q{Why is the typing indicator not stored in the database?}
+\A{Because it is worthless one second later. We send it as a Realtime
+\texttt{broadcast}, which is ephemeral pub/sub that never touches Postgres.
+Writing every keystroke to disk would be pointless load. Messages, which must be
+durable, go through \texttt{postgres\_changes}. Two primitives, two purposes.}
+
+\Q{How do the unread badges stay correct?}
+\A{A trigger. \texttt{on\_message\_inserted} fires after every insert and increments
+\texttt{host\_unread} or \texttt{guest\_unread} on the parent conversation depending
+on \texttt{sender\_role}, and stores a 100-character preview. The client never
+increments a counter, so the count is right no matter how the message was inserted.}
+
+\Q{Why does a sent message appear before the network call finishes?}
+\A{Optimistic UI. We generate a UUID client-side, append a message with
+\texttt{sending: true}, and render images from a local
+\texttt{URL.createObjectURL} blob so they appear instantly. Then we upload in
+parallel and insert the real row --- \emph{using the same id}. When the realtime
+event for our own message comes back, the \texttt{prev.some(m => m.id ===
+newMsg.id)} check recognises it and does not duplicate. If the upload fails we
+remove the optimistic message and revoke the blob URLs.}
+
+\Q{Why revoke the object URLs?}
+\A{\texttt{URL.createObjectURL} pins the file in memory until you revoke it. In a
+long chat session that is a genuine memory leak, so we revoke on both the success
+and the failure path.}
+
+\Q{How do you compress images?}
+\A{Client-side, before upload, with the Canvas API. We draw the image into a canvas
+scaled so its longest side is at most 1200 pixels, then call
+\texttt{canvas.toBlob(..., "image/jpeg", 0.6)}. A 12~MB photo becomes about
+150~KB. It saves the user's bandwidth, our storage bill, and the recipient's load
+time.}
+
+\Q{The guest can see the host's phone number. Doesn't RLS say you can only read
+your own profile?}
+\A{Yes, and that is exactly the problem we had to solve. Rather than weakening the
+policy, we wrote a \texttt{SECURITY DEFINER} function
+\texttt{shares\_conversation\_with(profile\_id)} that returns true only if an
+actual conversation exists between the caller and that profile, and added it as a
+second SELECT policy. So contact details unlock precisely when a real conversation
+exists --- never before. Public pages do not touch \texttt{profiles} at all; they
+read the \texttt{public\_profiles} view.}
+
+\subsection{QR check-in}
+
+\Q{What is inside the QR code?}
+\A{A URL: \texttt{https://.../bookings/<uuid>/check-in}. Generated server-side with
+the \texttt{qrcode} package as a base64 data URI, so nothing is stored or uploaded.
+Because it is a URL, a guest scanning it with their normal camera app lands on
+their own check-in page.}
+
+\Q{So if I photograph someone's QR code I can check in as them?}
+\A{No. The id is not a credential. To act on it the scanner must call
+\texttt{check\_in\_booking()}, which asks
+\texttt{can\_operate\_hotel(booking.hotel\_id)} --- true only for that hotel's
+manager or assigned staff. A stranger cannot even read the booking, because RLS
+blocks the select.}
+
+\Q{What stops a booking being checked in twice?}
+\A{\texttt{check\_in\_booking} requires \texttt{status = 'confirmed'}. After the
+first check-in the status is \texttt{'checked\_in'}, so the second attempt raises
+``Only confirmed bookings can be checked in''. The state machine is the guard.}
+
+\Q{How does the camera scanning work?}
+\A{The \texttt{html5-qrcode} library requests the rear camera
+(\texttt{facingMode: "environment"}) and decodes 10 frames a second. We pull the
+UUID out of the scanned URL with a regex, falling back to the raw text so a bare
+booking id also works. The \texttt{useEffect} cleanup calls \texttt{stop()} ---
+without that, the camera light stays on after you close the dialog.}
+
+\subsection{Maps, email, and the rest}
+
+\Q{Why not Google Maps?}
+\A{It needs an API key that must be shipped to the browser, where anyone can lift
+it and spend your money, and it needs a credit card on file. MapLibre with
+OpenFreeMap vector tiles is fully open source, needs no key, and has no rate limit.
+We kept Leaflet with CartoDB raster tiles as an automatic fallback so the map never
+disappears if WebGL is unavailable.}
+
+\Q{What is the difference between vector and raster tiles?}
+\A{Raster tiles are pre-rendered PNG images --- zoom in and they blur. Vector tiles
+ship geometry and the browser draws it with WebGL, so labels stay crisp at any
+zoom and we can restyle the map (that muted ``positron'' palette) entirely
+client-side.}
+
+\Q{Why Brevo, and why the HTTP API rather than SMTP?}
+\A{Serverless functions are short-lived and frequently blocked from outbound SMTP
+ports, whereas an HTTPS \texttt{fetch} always works. Brevo's free tier also does not
+require owning a verified domain. And \texttt{sendEmail} returns \texttt{false}
+rather than throwing --- a mail outage must never fail a paid booking.}
+
+\Q{Why is the email HTML written with tables and inline styles?}
+\A{Because email clients strip \texttt{<style>} blocks and Outlook renders with
+Word's layout engine, which has no flexbox or grid. Tables plus inline styles are
+the only combination that renders identically in Gmail, Outlook and Apple Mail.}
+
+\Q{What is the difference between a manager and staff?}
+\A{A manager owns hotels and must be approved by an admin before they can list
+anything. Staff are real login accounts, invited by a manager, scoped to \emph{one}
+hotel through a \texttt{hotel\_staff} row carrying a permissions array. Every
+database check goes through \texttt{can\_operate\_hotel()} (manager or any staff)
+or \texttt{can\_manage\_hotel(hotel, perm)} (manager or staff with that specific
+permission).}
+
+\Q{Could a staff member accept an invite meant for someone else?}
+\A{No. \texttt{accept\_my\_staff\_invites()} matches pending invites against the
+\emph{authenticated user's email}, not just the token in the link. A forwarded link
+redeemed by the wrong account matches nothing. Invites also expire after 14 days.}
+
+\Q{How do you stop an admin from silently doing something?}
+\A{Every admin power is a \texttt{SECURITY DEFINER} RPC that begins with
+\texttt{if get\_my\_role() <> 'admin' then raise exception} and ends by inserting
+into \texttt{admin\_audit\_log} --- in the same transaction as the change. An
+unlogged admin action is not possible.}
+
+\Q{How do you show prices in different currencies?}
+\A{Prices are stored in INR because that is what Razorpay charges. At display time
+\file{lib/currency.ts} detects the visitor's currency from their IP (falling back to
+the browser locale), fetches live exchange rates, and formats with
+\texttt{Intl.NumberFormat}. Both the rates and the detected locale are cached in
+\texttt{localStorage} --- six hours and 24 hours respectively. If anything fails we
+fall back to showing INR. \textbf{Conversion is presentation only}; the charge is
+always the stored INR amount.}
+
+\subsection{The hard questions}
+
+\Q{What is the weakest part of this system?}
+\A{Three things, honestly. First, \file{next.config.ts} sets
+\texttt{images.unoptimized = true} and allows \texttt{hostname: "**"}, because a
+manager may paste any image URL. The comment in the file says we should tighten it
+once all images live in Supabase Storage. Second, the \texttt{manager-documents}
+storage bucket allows anonymous inserts, because the document must be uploaded
+before the account exists --- the schema comment already flags that a production
+system should move this behind a server action. Third, the older
+\texttt{confirm\_payment} RPC (the manual UPI path, from before Razorpay) is
+trust-based: it takes the guest's word for a UPI reference number.}
+
+\Q{What would you build next?}
+\A{Automated tests around \texttt{book\_room} --- a concurrency test that fires N
+simultaneous bookings at the last room and asserts exactly one succeeds. Then rate
+limiting on the auth and booking endpoints. Then moving the manager-document upload
+behind a signed server action.}
+
+\Q{What was the hardest bug?}
+\A{The RLS infinite recursion between \texttt{hotels} and \texttt{hotel\_staff}.
+The error message points at a policy, but the cause is a \emph{cycle} between two
+policies, so nothing looks wrong in either one individually. The fix --- single-table
+\texttt{SECURITY DEFINER} helpers --- is the entire content of
+\file{supabase/hms\_rls\_recursion\_fix.sql}.}
+
+\Q{If you had to explain your project's architecture in one sentence?}
+\A{A Next.js app where the security and the business rules live in Postgres --- Row
+Level Security decides what you can see, and PL/pgSQL functions decide what you can
+do --- so the front end can be careless and the system is still correct.}
+
+\Q{Why should the database, not the API, enforce security?}
+\A{Because an API has many entry points and each one is a chance to forget a check.
+A table has one set of policies. If I add a new endpoint tomorrow and forget to
+check ownership, RLS still returns nothing. Defence in depth, with the deepest
+layer doing the real work.}
+
+\newpage
+%==============================================================================
+\section{Known Limitations and Honest Notes}
+
+Being able to name your own weaknesses is worth more than pretending there are
+none. If asked ``what's wrong with it?'', pick from this list.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{No automated tests.} The concurrency logic in \texttt{book\_room}
+        deserves a test that fires simultaneous bookings at the last room.
+  \item \textbf{Images are unoptimised.} \texttt{next.config.ts} disables Next's
+        image optimiser and allows any HTTPS host, because managers may paste
+        arbitrary image URLs. The mitigation --- an Unsplash-specific URL rewriter
+        --- lives in \file{lib/image.ts}, but it only helps for Unsplash.
+  \item \textbf{The \texttt{manager-documents} bucket accepts anonymous uploads},
+        because the document is uploaded before the account exists. The schema
+        comment already flags this: \emph{``For a production system, move this
+        upload behind a server action.''}
+  \item \textbf{The legacy \texttt{confirm\_payment} RPC is trust-based.} It was
+        the manual-UPI path before Razorpay. It is still granted to
+        authenticated users and should be revoked.
+  \item \textbf{No rate limiting} on auth or booking endpoints.
+  \item \textbf{Currency conversion is display-only} and depends on a third-party
+        FX API. If it is down, everything falls back to INR.
+  \item \textbf{A typo in \file{supabase/booking\_schema.sql} line 23}
+        --- \texttt{num\_rooms int not nu ll default 1} --- would make that file fail
+        if run on a fresh database. The live database was created before the typo
+        was introduced, so it has never been noticed. It should be fixed before
+        anyone tries to reproduce the schema from scratch.
+\end{enumerate}
+
+\begin{notebox}
+That last one is a real bug in the repository. Fixing it before the demo takes ten
+seconds, and mentioning that you found it while auditing your own schema is a much
+better story than having someone else find it.
+\end{notebox}
+
+\newpage
+%==============================================================================
+\section{Appendix A: Environment Variables}
+
+\begin{longtable}{@{}p{6.2cm}p{2.0cm}p{6.4cm}@{}}
+\toprule
+\textbf{Variable} & \textbf{Exposed?} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{NEXT\_PUBLIC\_SUPABASE\_URL} & Browser & Which Supabase project. \\
+\texttt{NEXT\_PUBLIC\_SUPABASE\_ANON\_KEY} & Browser & Public key. Safe --- RLS
+guards the data. \\
+\texttt{SUPABASE\_SERVICE\_ROLE\_KEY} & \textbf{Server only} &
+\textbf{Bypasses RLS.} Webhook only. \\
+\texttt{NEXT\_PUBLIC\_SITE\_URL} & Browser & Auth redirect target. \\
+\texttt{RAZORPAY\_KEY\_ID} & Server & Razorpay API id. \\
+\texttt{RAZORPAY\_KEY\_SECRET} & \textbf{Server only} & Signs and verifies
+payments. \\
+\texttt{NEXT\_PUBLIC\_RAZORPAY\_KEY\_ID} & Browser & Publishable key for the
+checkout modal. \\
+\texttt{RAZORPAY\_WEBHOOK\_SECRET} & \textbf{Server only} & Verifies the webhook
+body HMAC. \\
+\texttt{BREVO\_API\_KEY} & \textbf{Server only} & Sends transactional email. \\
+\texttt{EMAIL\_FROM}, \texttt{EMAIL\_FROM\_NAME} & Server & Sender identity. \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+\textbf{The rule.} In Next.js, \emph{any} variable prefixed
+\texttt{NEXT\_PUBLIC\_} is inlined into the JavaScript bundle at build time and is
+therefore readable by anyone. Everything without that prefix is server-only. Notice
+that \texttt{RAZORPAY\_KEY\_ID} and \texttt{NEXT\_PUBLIC\_RAZORPAY\_KEY\_ID} hold
+the same value --- one for server use, one deliberately marked as public. The
+\emph{secret} never gets the prefix.
+\end{warnbox}
+
+%==============================================================================
+\section{Appendix B: Glossary}
+\label{sec:glossary}
+
+\begin{longtable}{@{}p{4.0cm}p{10.8cm}@{}}
+\toprule
+\textbf{Term} & \textbf{Meaning} \\
+\midrule
+\endhead
+\textbf{App Router} & Next.js's routing system where folders are URLs. \\
+\textbf{Atomic} & All-or-nothing. Either every step happens or none does. \\
+\textbf{CDN} & A network of servers worldwide that cache your pages close to users. \\
+\textbf{Compare-and-swap} & Change a value only if it still holds the expected
+value. Used for our once-only email. \\
+\textbf{HMAC} & A fingerprint of a message made with a shared secret. Proves who
+sent it and that it was not altered. \\
+\textbf{Idempotent} & Doing it twice has the same effect as doing it once. \\
+\textbf{ISR} & Incremental Static Regeneration --- a page is pre-rendered and
+refreshed on a timer. \\
+\textbf{JWT} & JSON Web Token. A signed blob proving who you are. \\
+\textbf{Optimistic UI} & Showing the result before the server confirms it, and
+rolling back if it fails. \\
+\textbf{Paise} & 1/100 of a rupee. Razorpay works in integer paise to avoid
+floating-point money bugs. \\
+\textbf{PostgREST} & The service that turns Postgres tables into a REST API. \\
+\textbf{Race condition} & Two operations interleaving in a way that corrupts data. \\
+\textbf{Row lock} & \texttt{SELECT ... FOR UPDATE}. Makes other transactions wait
+for that row. \\
+\textbf{RLS} & Row Level Security. Per-row access rules enforced by Postgres. \\
+\textbf{RPC} & Remote Procedure Call. Here: calling a Postgres function from the
+app. \\
+\textbf{RSC} & React Server Component. Runs on the server, ships no JavaScript. \\
+\textbf{SECURITY DEFINER} & A Postgres function that runs with its creator's
+privileges, bypassing RLS internally. \\
+\textbf{Server Action} & A server function a Client Component can call directly. \\
+\textbf{SWR} & Stale-While-Revalidate. Show cached data now, refresh in background. \\
+\textbf{Timing attack} & Learning a secret by measuring how long a comparison takes. \\
+\textbf{Trigram index} & An index over every 3-character substring, making
+\texttt{ILIKE '\%x\%'} fast. \\
+\textbf{WebSocket} & A connection that stays open so the server can push data. \\
+\bottomrule
+\end{longtable}
+
+\vspace{1.2cm}
+\begin{center}
+\rule{0.5\textwidth}{0.6pt}\\[8pt]
+{\large\color{primary}\textbf{BookNest}}\\[3pt]
+{\small Built by Team Neuron}\\[10pt]
+\emph{Good luck tomorrow. You know this system --- now you can prove it.}
+\end{center}
+
+\end{document}
